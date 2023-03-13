@@ -18,4 +18,8 @@ Capstone Design in ICT, Spring 2023
    - 내용적기
 7. git push
    - 안되면 세팅해야함 git push --set-upstream origin 브랜치명
-   - main에 올라갔는지 깃허브 또는 git checkout main으로 확인(자동 PR 해놨음)
+8. git checkout main
+   - main으로 오세요
+9. git merge 본인브랜치명
+   - merge해서 본인이 수정한거 main에 넣으세요(자동 PR 해놨음)
+   - 변경사항 확인해보세요 
