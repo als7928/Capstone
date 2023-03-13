@@ -17,7 +17,7 @@ Capstone Design in ICT, Spring 2023
 6. git commit -m "~~~"
    - 내용적기
 7. git push
-   - minhyuk->minhyuk 업데이트
+   - minhyuk->minhyuk 최종 업데이트
    - 안되면 세팅해야함 git push --set-upstream origin 브랜치명
    - 원격저장소(깃허브) 본인 branch에서 변경사항 확인해보세요
 8. git checkout main
@@ -25,6 +25,6 @@ Capstone Design in ICT, Spring 2023
 9.  git merge 본인브랜치명
     - merge해서 본인이 수정한거 main에 넣으세요(잠시만 자동 PR 해놨음)
 10. git push
-    - minhyuk->main 업데이트
+    - minhyuk->main 최종 업데이트
     - 원격저장소(깃허브) main에서 변경사항 확인해보세요
 11. 코드 수정 전 항상 git pull 하는 습관을 들여야 동기화가 잘 됩니다
