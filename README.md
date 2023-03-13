@@ -27,3 +27,4 @@ Capstone Design in ICT, Spring 2023
 10. git push
     - minhyuk->main 업데이트
     - 원격저장소(깃허브) main에서 변경사항 확인해보세요
+11. 코드 수정 전 항상 git pull 하는 습관을 들여야 동기화가 잘 됩니다
