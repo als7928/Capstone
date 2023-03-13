@@ -3,7 +3,7 @@ Capstone Design in ICT, Spring 2023
 ---
 ### git 응용프로그램 사용 X. 터미널에서 명령어로만 하기
 ## 끝말잇기 해보기
-### 힌트
+### 튜토리얼
 1. git clone https://github.com/als7928/Capstone.git
    - 적절한 위치에 clone 하세요
 2. git branch 브랜치명
@@ -19,5 +19,5 @@ Capstone Design in ICT, Spring 2023
 7. git commit -m "~~~"
    - 내용적기
 8. git push
-   - 안되면 git push --set-upstream origin 브랜치명
+   - 안되면 세팅해야함 git push --set-upstream origin 브랜치명
    - main에 올라갔는지 깃허브 또는 git checkout main으로 확인(자동 PR 해놨음)
