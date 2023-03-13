@@ -23,7 +23,7 @@ Capstone Design in ICT, Spring 2023
 8. git checkout main
    - main으로 오세요
 9.  git merge 본인브랜치명
-    - merge해서 본인이 수정한거 main에 넣으세요(자동 PR 해놨음)
+    - merge해서 본인이 수정한거 main에 넣으세요(잠시만 자동 PR 해놨음)
 10. git push
     - minhyuk->main 업데이트
     - 원격저장소(깃허브) main에서 변경사항 확인해보세요
