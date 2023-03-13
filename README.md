@@ -13,7 +13,7 @@ Capstone Design in ICT, Spring 2023
 4. txt파일 수정
    - txt 파일을 수정하세요
 5. git add .
-   - 변경 파일(.)을 main에 올릴 준비
+   - 변경 파일(.)을 커밋할 준비
 6. git commit -m "~~~"
    - 내용적기
 7. git push
