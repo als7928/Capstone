@@ -8,12 +8,7 @@ git commit -am "<코맨트>"
 git push
 # pull request
 ```
-## DONE
-* ~~서버에 환경 설정~~
-  <br>`conda activate ldm`
-* 모델 코드 구조
-  [pic1](assets/architecture.jpg)
-  
+
 ## TO DO
 * ~~서버에 환경 설정~~
 * [Latent Diffusion](latent-diffusion/) 코드 분석 (~03/20)
