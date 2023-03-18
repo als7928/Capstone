@@ -9,5 +9,5 @@ git commit -am "<코맨트>"
 git push
 ```
 
-* TO DO </br>
+* TO DO
 [Latent Diffusion](latent-diffusion/) 코드 분석
