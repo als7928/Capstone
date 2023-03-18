@@ -9,9 +9,10 @@ git push
 # pull request
 ```
 ## DONE
-* ~/Capstone에 clone 및 환경설정 완료
-* 실행법 : `conda activate ldm`
+* ~~서버에 환경 설정~~
+  환경 적용 : `conda activate ldm`
   
 ## TO DO
+* ~~서버에 환경 설정~~
 * [Latent Diffusion](latent-diffusion/) 코드 분석
 * 
