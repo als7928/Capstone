@@ -1,7 +1,5 @@
-## Capstone Design in ICT, Spring 2023
----
-### 필수 루틴
----
+# Capstone Design in ICT, Spring 2023
+## 필수 루틴
 ```
 git checkout <브랜치>
 git pull origin main
@@ -10,6 +8,5 @@ git commit -am "<코맨트>"
 git push
 ```
 
-### TO DO
----
+## TO DO
 * [Latent Diffusion](latent-diffusion/) 코드 분석
