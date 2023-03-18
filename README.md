@@ -14,5 +14,5 @@ git push
   
 ## TO DO
 * ~~서버에 환경 설정~~
-* [Latent Diffusion](latent-diffusion/) 코드 분석
+* [Latent Diffusion](latent-diffusion/) 코드 분석 (~03/20)
 * 
