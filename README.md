@@ -10,5 +10,4 @@ git push
 ```
 
 * TO DO </br>
-  1.[Latent Diffusion](latent-diffusion/) 코드 분석
-  -  
+* 1.[Latent Diffusion](latent-diffusion/) 코드 분석
