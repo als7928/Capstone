@@ -2,10 +2,10 @@
 ---
 * 필수 루틴
 ```
-git checkout 
+git checkout <브랜치>
 git pull origin main
 # 코드 수정
-git commit -am "~~"
+git commit -am "<코맨트>"
 git push
 ```
 
