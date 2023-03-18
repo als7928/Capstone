@@ -10,7 +10,7 @@ git push
 ```
 ## DONE
 * ~~서버에 환경 설정~~
-  환경 적용 : `conda activate ldm`
+  <br>`conda activate ldm`
   
 ## TO DO
 * ~~서버에 환경 설정~~
