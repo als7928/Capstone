@@ -46,37 +46,40 @@ def uniform_on_device(r1, r2, shape, device):
 class DDPM(pl.LightningModule):
     # classic DDPM with Gaussian diffusion, in image space
     def __init__(self,
-                 unet_config,
-                 timesteps=1000,
-                 beta_schedule="linear",
-                 loss_type="l2",
-                 ckpt_path=None,
-                 ignore_keys=[],
-                 load_only_unet=False,
-                 monitor="val/loss",
-                 use_ema=True,
-                 first_stage_key="image",
-                 image_size=256,
-                 channels=3,
-                 log_every_t=100,
-                 clip_denoised=True,
-                 linear_start=1e-4,
-                 linear_end=2e-2,
-                 cosine_s=8e-3,
-                 given_betas=None,
-                 original_elbo_weight=0.,
+                 unet_config, #U-Net구조의 설정을 담고 있는 딕셔너리
+                 timesteps=1000, #Diffusion 과정 전체 타임스텝 수
+                 beta_schedule="linear", #Diffusion과정에서 사용될 beta값의 스케줄(선형, 코사인 등)
+                 #beta값은 일종의 확산계수(diffusion coeffecient)
+                 #diffusion은 입자들이 농도 차이에 따라 자연스럽게 이동하는 현상
+                 #=> 여러가지 상황에 따라 diffusion결과가 달라지는데, 그것에 관여하는 parameter
+                 loss_type="l2",#Loss Function에 종류, 여기에서는 L2로 지정한 것 같다.(기본적으로)
+                 ckpt_path=None, #model checkpoint경로
+                 ignore_keys=[], #checkpoint에서 무시할 key list
+                 load_only_unet=False, #U-Net모델만 불러올 것인지 여부
+                 monitor="val/loss", #모니터링할 지표(여기에서는 validation과 loss를 의미하는 것 같다.)
+                 use_ema=True, #지수 이동 평균(ema) 사용 여부
+                 first_stage_key="image",#모델에 입력될 데이터의 첫번째 스테이지 키
+                 image_size=256, #input image의 크기
+                 channels=3,#input image의 channel수
+                 log_every_t=100,#몇 스텝마다 log를 남길지 결정
+                 clip_denoised=True,#denoise한 결과를 clipping할지 여부
+                 linear_start=1e-4,#beta schedule의 선형 시작 값
+                 linear_end=2e-2, #beta schedule의 선형 끝 값
+                 cosine_s=8e-3, #beta schedule의 cosine함수 파라미터
+                 given_betas=None, #사용자가 직접 입력한 beta값 리스트
+                 original_elbo_weight=0., #원래의 ELBO weight값
                  v_posterior=0.,  # weight for choosing posterior variance as sigma = (1-v) * beta_tilde + v * beta
-                 l_simple_weight=1.,
-                 conditioning_key=None,
-                 parameterization="eps",  # all assuming fixed variance schedules
-                 scheduler_config=None,
-                 use_positional_encodings=False,
-                 learn_logvar=False,
-                 logvar_init=0.,
-                 make_it_fit=False,
-                 ucg_training=None,
-                 reset_ema=False,
-                 reset_num_ema_updates=False,
+                 l_simple_weight=1.,#Loss function중 하나(normalization)
+                 conditioning_key=None, #conditional모델에서 사용할 input data의 key
+                 parameterization="eps",  # all assuming fixed variance schedules #beta값 예측을 위한 파라미터
+                 scheduler_config=None, #scheduler설정(weight decay나 LR조정)
+                 use_positional_encodings=False,#positional encoding사용 여부(input의 위치정보 추가)
+                 learn_logvar=False,#로그 분산 학습 여부
+                 logvar_init=0., #로그 분산 초기 값
+                 make_it_fit=False, #모델 크기를 조정할지 여부
+                 ucg_training=None, # UCG training설정
+                 reset_ema=False, #ema초기화 여부
+                 reset_num_ema_updates=False, #ema 업데이트 수를 초기화할지 여부
                  ):
         super().__init__()
         assert parameterization in ["eps", "x0", "v"], 'currently only supporting "eps" and "x0" and "v"'
@@ -89,7 +92,11 @@ class DDPM(pl.LightningModule):
         self.image_size = image_size  # try conv?
         self.channels = channels
         self.use_positional_encodings = use_positional_encodings
-        self.model = DiffusionWrapper(unet_config, conditioning_key)
+        self.model = DiffusionWrapper(unet_config, conditioning_key) #Diffusion모델에서 추가적인 설정
+        #unet의 구조와 diffusion에 사용할 conditioning_key를 가지고 diffusion model을 만드는 것
+        #DiffusionWrapper를 따라가봤을 때, 'hybrid'라는 조건의 코드를 사용하는데, 이를 보면 
+        #concat(이전 영상과 현재 영상에서의 특징을 concat)<=diffusion과정 중 하나인 것 같다.
+        # 과 cross-attention을 모두 사용한다.
         count_params(self.model, verbose=True)
         self.use_ema = use_ema
         if self.use_ema:
@@ -133,6 +140,7 @@ class DDPM(pl.LightningModule):
         if self.ucg_training:
             self.ucg_prng = np.random.RandomState()
 
+    #Diffusion 모델에서 사용되는 betas, alphas, alphas_cumprod, posterior_variance 등의 변수들을 초기화하고 계산하는 함수
     def register_schedule(self, given_betas=None, beta_schedule="linear", timesteps=1000,
                           linear_start=1e-4, linear_end=2e-2, cosine_s=8e-3):
         if exists(given_betas):
@@ -189,6 +197,7 @@ class DDPM(pl.LightningModule):
         self.register_buffer('lvlb_weights', lvlb_weights, persistent=False)
         assert not torch.isnan(self.lvlb_weights).all()
 
+    ############## ema_scope라는 context manager를 정의 ############
     @contextmanager
     def ema_scope(self, context=None):
         if self.use_ema:
@@ -204,6 +213,7 @@ class DDPM(pl.LightningModule):
                 if context is not None:
                     print(f"{context}: Restored training weights")
 
+    #주어진 경로에서 PyTorch 모델의 가중치를 로드하여 현재 모델에 적용하는 기능을 수행
     @torch.no_grad()
     def init_from_ckpt(self, path, ignore_keys=list(), only_model=False):
         sd = torch.load(path, map_location="cpu")
@@ -267,6 +277,8 @@ class DDPM(pl.LightningModule):
         if len(unexpected) > 0:
             print(f"\nUnexpected Keys:\n {unexpected}")
 
+    #diffusion 과정에서 특정 시간 단계 t에서의 확산 분포 q(x_t | x_0)의 평균, 분산, 로그 분산을 계산하는 함수
+    #여기서 구한 diffusion 분포 'q'를 이용하여 나중에 denoising을 하는 것이다.
     def q_mean_variance(self, x_start, t):
         """
         Get the distribution q(x_t | x_0).
@@ -279,12 +291,14 @@ class DDPM(pl.LightningModule):
         log_variance = extract_into_tensor(self.log_one_minus_alphas_cumprod, t, x_start.shape)
         return mean, variance, log_variance
 
+    #노이즈와 현재의 x_t 값을 이용하여 초기 입력 x_0 값을 예측
     def predict_start_from_noise(self, x_t, t, noise):
         return (
                 extract_into_tensor(self.sqrt_recip_alphas_cumprod, t, x_t.shape) * x_t -
                 extract_into_tensor(self.sqrt_recipm1_alphas_cumprod, t, x_t.shape) * noise
         )
 
+    #z와 v 값을 이용하여 초기 입력 x_0 값을 예측
     def predict_start_from_z_and_v(self, x_t, t, v):
         # self.register_buffer('sqrt_alphas_cumprod', to_torch(np.sqrt(alphas_cumprod)))
         # self.register_buffer('sqrt_one_minus_alphas_cumprod', to_torch(np.sqrt(1. - alphas_cumprod)))
@@ -888,7 +902,7 @@ class LatentDiffusion(DDPM):
         loss_dict = {}
         prefix = 'train' if self.training else 'val'
 
-        if self.parameterization == "x0":
+        if self.parameterization == "x0": #이거 beta변수 설정부분이었던 것 같다.
             target = x_start
         elif self.parameterization == "eps":
             target = noise
@@ -1333,10 +1347,17 @@ class DiffusionWrapper(pl.LightningModule):
                 out = self.scripted_diffusion_model(x, t, cc)
             else:
                 out = self.diffusion_model(x, t, context=cc)
-        elif self.conditioning_key == 'hybrid':
-            xc = torch.cat([x] + c_concat, dim=1)
-            cc = torch.cat(c_crossattn, 1)
-            out = self.diffusion_model(xc, t, context=cc)
+        elif self.conditioning_key == 'hybrid': #concat과 crossattention을 모두 이용
+            xc = torch.cat([x] + c_concat, dim=1)#dim=1은 torch.cat 함수가 tensor들을 결합할 때, tensor들을 연결할 dimension을 의미
+            #여기서 dim=1은 첫 번째 tensor x와 c_concat 리스트의 tensor들을 연결할 때, 두 tensor들의 크기가 서로 같은 dimension을 사용
+            #아마 channel쪽으로 concat할 것 같다.(HxW가 같다면)
+            #c_concat은 이전 image와 합쳐지는 feature map(list)
+            cc = torch.cat(c_crossattn, 1) #여기서 1은 dim=1과 같은 의미(channel쪽으로 뚱뚱해진다.)
+            #c_crossattn은 이전 image와 cross attention을 사용해 extract한 feature map의 list
+            #cc는 conditional data이다. 
+            out = self.diffusion_model(xc, t, context=cc)#context는 cc가 conditional data를 담고 있다는 것을 알려준다.
+            #t는 전체 과정 중 현재를 의미하고, xc는 전체 결과 중 현재 결과를 의미하는 것 같다.
+            #따라서 conditional data를 사용하여 t+1의 결과를 도출해내는 것이 이 코드의 역할인 것 같다.
         elif self.conditioning_key == 'hybrid-adm':
             assert c_adm is not None
             xc = torch.cat([x] + c_concat, dim=1)
