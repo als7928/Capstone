@@ -5,7 +5,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-class LSUNBase(Dataset):
+class ShanghaiBase(Dataset):
     def __init__(self,
                  txt_file,
                  data_root,
