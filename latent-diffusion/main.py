@@ -474,13 +474,15 @@ if __name__ == "__main__":
     #컴퓨터에서 실행하는 프로그램의 명령어를 입력할 때, 명령어의 인자들을 구분하는데 공백 문자(스페이스, 탭 등)을 사용
     opt, unknown = parser.parse_known_args()# parser의 인자들의 opt와 unknown변수에 parsing
     #opt는 Trainer클래스에서 사용할 index저장, unkown은 그 외 인식 불가한 index저장(잘못 입력되었거나, 추가 입력된 것) 
-    if opt.name and opt.resume:
+    if opt.name and opt.resume: #모델을 Test할 때, -r과 -n명령어를 동시에 쓸 수 없도록 하기 위한 조건문
+        #즉 opt는 터미널에 입력하는 변수들을 저장하는 변수이다.
         raise ValueError(
             "-n/--name and -r/--resume cannot be specified both."
             "If you want to resume training in a new log folder, "
             "use -n/--name in combination with --resume_from_checkpoint"
         )
-    if opt.resume: #checkpoint를 불러와서 학습할 때의 옵션, 즉 전이학습을 할 때 사용
+    
+    if opt.resume: #checkpoint를 불러와서 학습할 때의 옵션, 즉 전이학습을 할 때 사용(-r 옵션을 주면 사용 가능)
         if not os.path.exists(opt.resume):
             raise ValueError("Cannot find {}".format(opt.resume))
         if os.path.isfile(opt.resume):
@@ -499,45 +501,64 @@ if __name__ == "__main__":
         opt.base = base_configs + opt.base #이전에 사용했던 yaml파일과 새로 사용하는 yaml파일을 합친다.
         _tmp = logdir.split("/")
         nowname = _tmp[-1]
-    else: #전이학습을 하지 않을 때(checkpoint x)
-        if opt.name:
+    else: #전이학습을 하지 않을 때(checkpoint x) (-r 옵션이 없을 때 실행된다.)
+        if opt.name: #training을 할 때, -n옵션이 있어야 한다.
             name = "_" + opt.name
-        elif opt.base:
-            cfg_fname = os.path.split(opt.base[0])[-1]
-            cfg_name = os.path.splitext(cfg_fname)[0]
-            name = "_" + cfg_name
+        elif opt.base: #-base 옵션은 있으므로 우리 모델에 해당한다.(opt.base는 yaml파일의 경로를 의미)
+            #cfg_fname은 yaml파일의 이름을 의미(ex. seg.yaml)
+            cfg_fname = os.path.split(opt.base[0])[-1] #yaml파일의 경로에서 파일 이름만 선택하여 저장
+            cfg_name = os.path.splitext(cfg_fname)[0] #확장자를 제외한 이름 저장(ex.  seg)
+            name = "_" + cfg_name #따라서 name변수는 _seg가 된다.
         else:
             name = ""
-        nowname = now + name + opt.postfix
-        logdir = os.path.join(opt.logdir, nowname)
+        nowname = now + name + opt.postfix # postfix 옵션이 있다면 사용, now는 현재 날짜와 시간정보
+        logdir = os.path.join(opt.logdir, nowname) #로그를 저장할 directory경로 지정
 
-    ckptdir = os.path.join(logdir, "checkpoints")
-    cfgdir = os.path.join(logdir, "configs")
+    ckptdir = os.path.join(logdir, "checkpoints")#checkpoint를 저장할 경로 
+    cfgdir = os.path.join(logdir, "configs") #yaml파일을 저장할 경로
     seed_everything(opt.seed)
 #####여기까지가 PyTorch Lightning에서 학습을 시작하기 위한 코드######
 
+    #모든 기준은 우선 seg.yaml파일로 하여 주석 작성
 
     try:
         # init and save configs
-        configs = [OmegaConf.load(cfg) for cfg in opt.base]
-        cli = OmegaConf.from_dotlist(unknown)
-        config = OmegaConf.merge(*configs, cli)
+        #OmegaConf는 yaml이나 JSON같은 설정파일들을 OmegaConf객체로 변환하여 쉽게 불러올 수 있도록 한다.
+        #base에는 yaml파일의 경로가 있고, 우선 Training을 위한 코드를 목적으로 opt.base가 다음과 같다고 가정한다.
+        #configs/latent-diffusion/seg.yaml
+        configs = [OmegaConf.load(cfg) for cfg in opt.base] #config에 yaml파일의 객체들이 모두 저장된다.
+        cli = OmegaConf.from_dotlist(unknown) #인식하지 못한 변수들을 저장(나중에 사용할 수도 있는 값들)
+        config = OmegaConf.merge(*configs, cli) #yaml파일의 모든 객체와 CLI를 통해 입력된 uknown값들을 config에 저장
+        
+        # yaml파일의 lightning객체를 lightning_config에 저장, 객체에는 lightning.trainer 등이 있다.(yaml파일 참고)
         lightning_config = config.pop("lightning", OmegaConf.create())
+        
         # merge trainer cli with config
+        #lightning_config에서 trainer객체를 trainer_config에 저장
+        #trainer.benchmark가 True로 저장되어 있다.
         trainer_config = lightning_config.get("trainer", OmegaConf.create())
+        
         # default to ddp
-        trainer_config["accelerator"] = "ddp"
+        trainer_config["accelerator"] = "ddp" #trainer_config에 accelerator 키에는 ddp가 저장
+        
+        #opt는 CLI(터미널)을 통해 입력받은 인덱스들
+        #nondefault_trainer_args(opt)는 CLI를 통해 입력받은 인덱스 중 PyTorch Lightning에 없는
+        #인덱스 값들의 list이다.(기본값이 아닌 값들)
         for k in nondefault_trainer_args(opt):
-            trainer_config[k] = getattr(opt, k)
-        if not "gpus" in trainer_config:
+            trainer_config[k] = getattr(opt, k)#기본값이 아닌 인덱스들을 trainer_config에 저장한다.
+        if not "gpus" in trainer_config: #gpus라는 옵션이 없을 때 cpu만 사용하는 조건문(seg.yaml은 사용)
             del trainer_config["accelerator"]
             cpu = True
         else:
-            gpuinfo = trainer_config["gpus"]
-            print(f"Running on GPUs {gpuinfo}")
+            gpuinfo = trainer_config["gpus"] #gpuinfo는 gpus정보를 받는다.(우선 github에서는 기본적으로 0이라고 함)
+            print(f"Running on GPUs {gpuinfo}")#gpu번호를 말하는 것 같다.(서버에서 사용할 gpu선택하면 될 것 같다.)
             cpu = False
+            
+        #**는 딕셔너리의 키-값 쌍을 함수의 인자로 전달할 때 사용
+        #trainer_config를 Namespace객체로 변환하여 trainer_opt에 저장
+        #trainer_opt.gpus 등의 형태로 사용가능하다.
         trainer_opt = argparse.Namespace(**trainer_config)
-        lightning_config.trainer = trainer_config
+        lightning_config.trainer = trainer_config#trainer_config의 정보를 lightning_config.trainer객체에 저장
 
         # model
         model = instantiate_from_config(config.model)
