@@ -1,7 +1,8 @@
 import numpy as np
 import math
+import os
 import cv2
-import mmcv
+from PIL import Image
 import scipy.io as sio
 
 def GaussianKernel(shape=(3, 3), sigma=0.5):
@@ -75,44 +76,49 @@ def create_dmap(img, gtLocation, depth, sigma, downscale=1.0):
     return densityMap
 
 
-def load_depth():
-    depth = sio.loadmat("DEPTH_1009.mat")
+def load_depth(depth_matfile):
+    depth = sio.loadmat(depth_matfile)
     depth = depth['depth']
     depth[depth > 20000] = 0
     # depth[depth > 255] = 0
     depth[depth < 0] = 0
     depth = depth / 20000
-    depth = depth * 255
-    depth = depth.astype(np.uint8)
+    # print(depth)
+    # depth = depth * 255
     # depth = depth / 255
-    cv2.imshow("dd", depth)
-    cv2.waitKey()
+    # depth = depth.astype(np.uint8)
+    # print(depth)
     return depth
 
-def load_point():
-    loc = sio.loadmat("GT_1009.mat")
+def load_point(gt_mat):
+    loc = sio.loadmat(gt_mat)
     loc = loc['point'].astype(np.float32)
     return loc
     
 
 if __name__ == '__main__':
-        img = mmcv.imread("IMG_1009.png")
-        # load annotation
-        # annot is a numpy array (N, 5).
-        # N means there are N objects in the image, 5 means {x1,y1,x2,y2,class_id}
+        imgdir = os.listdir("train/train_data/train_img")
+        for i in range(0, len(imgdir)):
+            img = "train/train_data/train_img/"+imgdir[i]
+            depth = imgdir[i].replace("IMG", "DEPTH").replace("png", "mat")
+            gt = imgdir[i].replace("IMG", "GT").replace("png", "mat")
+            depth_matfile = "train/train_data/train_depth/"+depth
+            gt_mat = "train/train_data/train_gt/"+gt
+            # print(img, depth_matfile, gt_mat)
+            img2 = cv2.imread(img)
+            # load annotation
+            # annot is a numpy array (N, 5).
+            # N means there are N objects in the image, 5 means {x1,y1,x2,y2,class_id}
 
-        depth = load_depth()
-        # print(depth)
-
-        loc = load_point()
-        dmap = create_dmap(img, loc, depth, 0.6, downscale=4.0)
-        new_image = dmap.astype(np.uint8)
-        new_rgb = np.dstack([dmap, dmap, dmap])
-        print(dmap)
-        # print(new_rgb)
-        out = 1*img 
-        img = cv2.resize(img, (480, 270))
-        # cv2.imshow("dd", new_rgb*255)
-        # cv2.imshow("dd3", img)
-        # cv2.imwrite("dd.png", new_rgb*255)
-        # cv2.waitKey()
+            depth = load_depth(depth_matfile)
+            loc = load_point(gt_mat)
+            dmap = create_dmap(img2, loc, depth, 0.6, downscale=1.0)
+            dmap = 20000*dmap
+            # dmap = dmap.astype(np.uint8)
+            # dmap = np.dstack([dmap, dmap, dmap])
+            # data = Image.fromarray(dmap)
+            name = "train/train_data/train_density/"+imgdir[i].replace("IMG", "DENSITY")
+            cv2.imwrite(name, dmap)
+            # data.save(name)
+            # print(i, "번째")
+        print("done")
