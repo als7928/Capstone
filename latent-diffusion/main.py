@@ -18,6 +18,8 @@ from pytorch_lightning.utilities.distributed import rank_zero_only
 from pytorch_lightning.utilities import rank_zero_info
 
 from ldm.data.base import Txt2ImgIterableBaseDataset
+#########shanghai.py############
+from ldm.data.shanghai import *
 from ldm.util import instantiate_from_config
 
 
@@ -149,6 +151,7 @@ def worker_init_fn(_):
     dataset = worker_info.dataset
     worker_id = worker_info.id
 
+    #Txt2Img가 아니라면 else문으로 간다.
     if isinstance(dataset, Txt2ImgIterableBaseDataset):
         split_size = dataset.num_records // worker_info.num_workers
         # reset num_records to the true number to retain reliable length information
@@ -195,9 +198,10 @@ class DataModuleFromConfig(pl.LightningDataModule):
                 self.datasets[k] = WrappedDataset(self.datasets[k])
 
     def _train_dataloader(self):
-        is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
+        #원본코드#is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
+        is_iterable_dataset = isinstance(self.datasets['train'], ShanhaiTrain)
         if is_iterable_dataset or self.use_worker_init_fn:
-            init_fn = worker_init_fn
+            init_fn = worker_init_fn #img2img에 적절한 설정값이 있을 수도 있다.
         else:
             init_fn = None
         return DataLoader(self.datasets["train"], batch_size=self.batch_size,
@@ -205,7 +209,8 @@ class DataModuleFromConfig(pl.LightningDataModule):
                           worker_init_fn=init_fn)
 
     def _val_dataloader(self, shuffle=False):
-        if isinstance(self.datasets['validation'], Txt2ImgIterableBaseDataset) or self.use_worker_init_fn:
+        #원본코드#if isinstance(self.datasets['validation'], Txt2ImgIterableBaseDataset) or self.use_worker_init_fn:
+        if isinstance(self.datasets['validation'], ShanhaiValidation) or self.use_worker_init_fn:
             init_fn = worker_init_fn
         else:
             init_fn = None
@@ -215,7 +220,10 @@ class DataModuleFromConfig(pl.LightningDataModule):
                           worker_init_fn=init_fn,
                           shuffle=shuffle)
 
+####################33test에 대한 dataloader는 우선 수정 생략###############3
+
     def _test_dataloader(self, shuffle=False):
+        #is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
         is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
         if is_iterable_dataset or self.use_worker_init_fn:
             init_fn = worker_init_fn
