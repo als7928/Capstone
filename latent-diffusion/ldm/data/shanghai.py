@@ -89,9 +89,9 @@ class ShanghaiBase(Dataset):
 
 class ShanhaiTrain(ShanghaiBase):
     def __init__(self, **kwargs):
-        super().__init__(data_dir="train/train_data/train_img", **kwargs)
+        super().__init__(**kwargs)
 
 
 class ShanhaiValidation(ShanghaiBase):
     def __init__(self, **kwargs):
-        super().__init__(data_dir="train/train_data/test_img",**kwargs)
+        super().__init__(**kwargs)
