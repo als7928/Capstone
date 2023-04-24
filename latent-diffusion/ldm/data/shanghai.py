@@ -4,6 +4,7 @@ import PIL
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
+import torchvision.transforms.functional as TF
 
 class ShanghaiBase(Dataset):
     def __init__(self,
@@ -21,7 +22,7 @@ class ShanghaiBase(Dataset):
                 if file.endswith(".png"):
                     file_path = os.path.join(subdir, file)
                     self.image_paths.append(file_path)
-                    self.cond_paths.append(file_path.replace("IMG", "DENSITY").replace("img", "density"))
+                    self.cond_paths.append(file_path.replace("DENSITY", "IMG").replace("density", "img"))
         # with open(self.data_paths, "r") as f:
         #     self.image_paths = f.read().splitlines()
 
@@ -29,7 +30,7 @@ class ShanghaiBase(Dataset):
 
         self._length = len(self.image_paths)
         self. labels = {
-            "file_path_": [l for l in self.image_paths],
+            "image_path_": [l for l in self.image_paths],
             "cond_path_": [l for l in self.cond_paths],
         }
         # self. labels = {
@@ -45,6 +46,7 @@ class ShanghaiBase(Dataset):
                               "lanczos": PIL.Image.LANCZOS,
                               }[interpolation]
         # self.flip = transforms.RandomHorizontalFlip(p=flip_p)
+        # self.flip = TF.hflip()
 
     def __len__(self):
         return self._length
@@ -52,9 +54,9 @@ class ShanghaiBase(Dataset):
     def __getitem__(self, i):
         # example = dict()
         example = dict((k, self.labels[k][i]) for k in self.labels)
-        rgb = Image.open(example["file_path_"])
+        rgb = Image.open(example["image_path_"])
         cond = Image.open(example["cond_path_"])
-
+        probility = np.randint(2)
         # rgb_path = self.image_paths[i]
         # cond_path = rgb_path[i].replace("IMG", "DENSITY").replace("img", "density")
     
@@ -75,12 +77,14 @@ class ShanghaiBase(Dataset):
             if self.size is not None:
                 image = image.resize((self.size, self.size), resample=self.interpolation)
 
-            # image = self.flip(image)
+            if probility == 1: # 증강
+                # image = self.flip(image)
+                image = TF.hflip(image)
             image = np.array(image).astype(np.uint8)
             image = (image / 127.5 - 1.0).astype(np.float32)
             if idx == 0:
-                key = "image"
-            else: key = "density"
+                key = "density"
+            else: key = "rgb"
             example[key] = (image / 127.5 - 1.0).astype(np.float32)
         # example["image"] = (image / 127.5 - 1.0).astype(np.float32)
         # return example
