@@ -78,11 +78,11 @@ data:
     num_workers: 5
     wrap: False
     train:
-      target: ldm.data.flickr.FlickrSegTrain  #  PUT YOUR DATASET 
+      target: ldm.data.shanhai.ShanhaiTrain  #  PUT YOUR DATASET 
       params:
         size: 256
     validation:
-      target: ldm.data.flickr.FlickrSegEval  #  PUT YOUR DATASET 
+      target: ldm.data.shanhai.ShanhaiValidation  #  PUT YOUR DATASET 
       params:
         size: 256
 
