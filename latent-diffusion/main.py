@@ -18,6 +18,8 @@ from pytorch_lightning.utilities.distributed import rank_zero_only
 from pytorch_lightning.utilities import rank_zero_info
 
 from ldm.data.base import Txt2ImgIterableBaseDataset
+#########shanghai.py############
+from ldm.data.shanghai import *
 from ldm.util import instantiate_from_config
 
 
@@ -149,6 +151,7 @@ def worker_init_fn(_):
     dataset = worker_info.dataset
     worker_id = worker_info.id
 
+    #Txt2Img가 아니라면 else문으로 간다.
     if isinstance(dataset, Txt2ImgIterableBaseDataset):
         split_size = dataset.num_records // worker_info.num_workers
         # reset num_records to the true number to retain reliable length information
@@ -195,9 +198,10 @@ class DataModuleFromConfig(pl.LightningDataModule):
                 self.datasets[k] = WrappedDataset(self.datasets[k])
 
     def _train_dataloader(self):
-        is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
+        #원본코드#is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
+        is_iterable_dataset = isinstance(self.datasets['train'], ShanhaiTrain)
         if is_iterable_dataset or self.use_worker_init_fn:
-            init_fn = worker_init_fn
+            init_fn = worker_init_fn #img2img에 적절한 설정값이 있을 수도 있다.
         else:
             init_fn = None
         return DataLoader(self.datasets["train"], batch_size=self.batch_size,
@@ -205,7 +209,8 @@ class DataModuleFromConfig(pl.LightningDataModule):
                           worker_init_fn=init_fn)
 
     def _val_dataloader(self, shuffle=False):
-        if isinstance(self.datasets['validation'], Txt2ImgIterableBaseDataset) or self.use_worker_init_fn:
+        #원본코드#if isinstance(self.datasets['validation'], Txt2ImgIterableBaseDataset) or self.use_worker_init_fn:
+        if isinstance(self.datasets['validation'], ShanhaiValidation) or self.use_worker_init_fn:
             init_fn = worker_init_fn
         else:
             init_fn = None
@@ -215,7 +220,10 @@ class DataModuleFromConfig(pl.LightningDataModule):
                           worker_init_fn=init_fn,
                           shuffle=shuffle)
 
+####################33test에 대한 dataloader는 우선 수정 생략###############3
+
     def _test_dataloader(self, shuffle=False):
+        #is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
         is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
         if is_iterable_dataset or self.use_worker_init_fn:
             init_fn = worker_init_fn
@@ -561,13 +569,18 @@ if __name__ == "__main__":
         lightning_config.trainer = trainer_config#trainer_config의 정보를 lightning_config.trainer객체에 저장
 
         # model
+        #결론적으로 get_obj_from_str(config["target"])(**config.get("params", dict()))의 결과를 model에 return
+        #yaml파일의 target:ldm.models.diffusion.ddpm.LatentDiffusion
+        #yaml파일의 params의 인덱스들을 인스턴스로 전달(key와 value모두)
+        #예를 들어 model.image_size는 64가 된다. model은 LatentDiffusion 클래스이다.
         model = instantiate_from_config(config.model)
-
+ 
         # trainer and callbacks
-        trainer_kwargs = dict()
+        trainer_kwargs = dict() #학습에 필요한 여러가지 index를 저장하기 위한 빈 dictionary 생성
 
         # default logger configs
-        default_logger_cfgs = {
+        default_logger_cfgs = { #로그 출력에 사용하는 인덱스를 dictionary 형태로 저장하는 코드
+        #pytorch_lightning을 사용하여 로그 값을 출력한다.
             "wandb": {
                 "target": "pytorch_lightning.loggers.WandbLogger",
                 "params": {
@@ -578,38 +591,43 @@ if __name__ == "__main__":
                 }
             },
             "testtube": {
-                "target": "pytorch_lightning.loggers.TestTubeLogger",
+                "target": "pytorch_lightning.loggers.TestTubeLogger",#PyTorch Lightning에서 제공하는 로깅 라이브러리 중 하나
+                #TestTubeLogger는 experiment 결과를 저장하고 관리하기 위한 구조를 제공
                 "params": {
                     "name": "testtube",
                     "save_dir": logdir,
                 }
             },
         }
-        default_logger_cfg = default_logger_cfgs["testtube"]
-        if "logger" in lightning_config:
+        default_logger_cfg = default_logger_cfgs["testtube"]#Test에 사용되는 logging library를 저장
+        if "logger" in lightning_config: #yaml파일 trainer에 logger가 따로 선언되어 있으면 사용
             logger_cfg = lightning_config.logger
         else:
             logger_cfg = OmegaConf.create()
-        logger_cfg = OmegaConf.merge(default_logger_cfg, logger_cfg)
-        trainer_kwargs["logger"] = instantiate_from_config(logger_cfg)
+        logger_cfg = OmegaConf.merge(default_logger_cfg, logger_cfg)#testtube의 값과 설정 값을 merge하여 저장
+        #trainer_kwargs는 학습에 필요한 인덱스를 저장하기 위한 비어있는 dictionary
+        trainer_kwargs["logger"] = instantiate_from_config(logger_cfg)#trainer_kwarge dic에 logger키를 갖는 값을 저장
 
         # modelcheckpoint - use TrainResult/EvalResult(checkpoint_on=metric) to
         # specify which metric is used to determine best models
+        #default_modelckpt_cfg는 checkpoint를 위한 dictionary
         default_modelckpt_cfg = {
             "target": "pytorch_lightning.callbacks.ModelCheckpoint",
             "params": {
-                "dirpath": ckptdir,
+                "dirpath": ckptdir,#ckptdir은 위에서 정의한 checkpoint경로이다.
                 "filename": "{epoch:06}",
                 "verbose": True,
                 "save_last": True,
             }
         }
-        if hasattr(model, "monitor"):
+        if hasattr(model, "monitor"):#hasattr()은 Python 내장 함수 중 하나
+            #객체가 특정 속성(attribute)을 가지고 있는지 여부를 검사하는 함수
+            #model의 인덱스에 monitor가 있다면 해당 값으로 'default_modelckpt_cfg' dictionary에 저장
             print(f"Monitoring {model.monitor} as checkpoint metric.")
             default_modelckpt_cfg["params"]["monitor"] = model.monitor
             default_modelckpt_cfg["params"]["save_top_k"] = 3
 
-        if "modelcheckpoint" in lightning_config:
+        if "modelcheckpoint" in lightning_config:#yaml파일에 chekpoint에 대해 정의 되어있다면 사용
             modelckpt_cfg = lightning_config.modelcheckpoint
         else:
             modelckpt_cfg =  OmegaConf.create()
@@ -620,7 +638,7 @@ if __name__ == "__main__":
 
         # add callback which sets up log directory
         default_callbacks_cfg = {
-            "setup_callback": {
+            "setup_callback": {#학습 시작 전에 필요한 설정을 수행하는 콜백
                 "target": "main.SetupCallback",
                 "params": {
                     "resume": opt.resume,
@@ -632,7 +650,7 @@ if __name__ == "__main__":
                     "lightning_config": lightning_config,
                 }
             },
-            "image_logger": {
+            "image_logger": {#일정 주기로 모델이 생성하는 이미지를 로깅하는 콜백
                 "target": "main.ImageLogger",
                 "params": {
                     "batch_frequency": 750,
@@ -640,18 +658,18 @@ if __name__ == "__main__":
                     "clamp": True
                 }
             },
-            "learning_rate_logger": {
+            "learning_rate_logger": {#학습 시에 학습률을 로깅하는 콜백
                 "target": "main.LearningRateMonitor",
                 "params": {
                     "logging_interval": "step",
                     # "log_momentum": True
                 }
             },
-            "cuda_callback": {
+            "cuda_callback": {#모델을 GPU로 이동하는 콜백
                 "target": "main.CUDACallback"
             },
         }
-        if version.parse(pl.__version__) >= version.parse('1.4.0'):
+        if version.parse(pl.__version__) >= version.parse('1.4.0'):#PyTorch Lightning의 버전이 1.4.0 이상이어야 함
             default_callbacks_cfg.update({'checkpoint_callback': modelckpt_cfg})
 
         if "callbacks" in lightning_config:
