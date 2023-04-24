@@ -8,7 +8,7 @@ model:
     timesteps: 1000
     loss_type: l1
     first_stage_key: image
-    cond_stage_key: segmentation
+    cond_stage_key: density
     image_size: 64
     channels: 3
     concat_mode: true
@@ -78,11 +78,11 @@ data:
     num_workers: 5
     wrap: False
     train:
-      target: ldm.data.flickr.FlickrSegTrain  #  PUT YOUR DATASET 
+      target: ldm.data.shanhai.ShanhaiTrain  #  PUT YOUR DATASET 
       params:
         size: 256
     validation:
-      target: ldm.data.flickr.FlickrSegEval  #  PUT YOUR DATASET 
+      target: ldm.data.shanhai.ShanhaiValidation  #  PUT YOUR DATASET 
       params:
         size: 256
 
