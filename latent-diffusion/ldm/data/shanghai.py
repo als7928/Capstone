@@ -54,7 +54,7 @@ class ShanghaiBase(Dataset):
     def __getitem__(self, i):
         # example = dict()
         example = dict((k, self.labels[k][i]) for k in self.labels)
-        rgb = Image.open(example["image_path_"])
+        density = Image.open(example["image_path_"])
         cond = Image.open(example["cond_path_"])
         probility = np.randint(2)
         # rgb_path = self.image_paths[i]
@@ -62,7 +62,7 @@ class ShanghaiBase(Dataset):
     
         # example = dict((k, self.labels[k][i]) for k in self.labels)
         # image = Image.open(example["file_path_"])
-        for idx, image in enumerate([rgb, cond]):
+        for idx, image in enumerate([density, cond]):
             if not image.mode == "RGB":
                 image = image.convert("RGB")
 
