@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
 from functools import partial
+
+#추가코드
+#import openai
+
 import clip
 import open_clip
 from einops import rearrange, repeat

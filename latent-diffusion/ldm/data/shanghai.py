@@ -23,6 +23,7 @@ class ShanghaiBase(Dataset):
                     file_path = os.path.join(subdir, file)
                     self.image_paths.append(file_path)
                     self.cond_paths.append(file_path.replace("DENSITY", "IMG").replace("density", "img"))
+                    
         # with open(self.data_paths, "r") as f:
         #     self.image_paths = f.read().splitlines()
 
@@ -33,6 +34,7 @@ class ShanghaiBase(Dataset):
             "image_path_": [l for l in self.image_paths],
             "cond_path_": [l for l in self.cond_paths],
         }
+        #print('labels;---------', self.labels)
         # self. labels = {
         #     "relative_file_path_": [l for l in self.image_paths],
         #     "file_path_": [os.path.join(self.data_dir, l)
@@ -56,14 +58,14 @@ class ShanghaiBase(Dataset):
         example = dict((k, self.labels[k][i]) for k in self.labels)
         density = Image.open(example["image_path_"])
         cond = Image.open(example["cond_path_"])
-        probility = np.randint(2)
+        probility = np.random.randint(2)
         # rgb_path = self.image_paths[i]
         # cond_path = rgb_path[i].replace("IMG", "DENSITY").replace("img", "density")
     
         # example = dict((k, self.labels[k][i]) for k in self.labels)
         # image = Image.open(example["file_path_"])
         for idx, image in enumerate([density, cond]):
-            if not image.mode == "RGB":
+            if not image.mode == "RGB": # rgb가 맞는것 아닌가??
                 image = image.convert("RGB")
 
             # default to score-sde preprocessing
@@ -91,11 +93,11 @@ class ShanghaiBase(Dataset):
         return example
 
 
-class ShanhaiTrain(ShanghaiBase):
+class ShanghaiTrain(ShanghaiBase):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(data_dir="../train/train_data/train_density",**kwargs)
 
 
-class ShanhaiValidation(ShanghaiBase):
+class ShanghaiValidation(ShanghaiBase):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(data_dir="../valid/valid_data/valid_density",**kwargs)
