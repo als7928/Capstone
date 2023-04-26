@@ -18,9 +18,9 @@ class ShanghaiBase(Dataset):
         self.image_paths = []
         self.cond_paths = []
         for subdir, dirs, files in os.walk(data_dir):
-            for file in files:
+            for file in files: #"DENSITY_0201.png"
                 if file.endswith(".png"):
-                    file_path = os.path.join(subdir, file)
+                    file_path = os.path.join(subdir, file) #"train/train_data/train_density" "/" "DENSITY_0201.png"
                     self.image_paths.append(file_path)
                     self.cond_paths.append(file_path.replace("DENSITY", "IMG").replace("density", "img"))
                     
@@ -65,7 +65,7 @@ class ShanghaiBase(Dataset):
         # example = dict((k, self.labels[k][i]) for k in self.labels)
         # image = Image.open(example["file_path_"])
         for idx, image in enumerate([density, cond]):
-            if not image.mode == "RGB": # rgb가 맞는것 아닌가??
+            if not image.mode == "RGB": 
                 image = image.convert("RGB")
 
             # default to score-sde preprocessing
@@ -83,7 +83,7 @@ class ShanghaiBase(Dataset):
                 # image = self.flip(image)
                 image = TF.hflip(image)
             image = np.array(image).astype(np.uint8)
-            image = (image / 127.5 - 1.0).astype(np.float32)
+            #image = (image / 127.5 - 1.0).astype(np.float32)
             if idx == 0:
                 key = "density"
             else: key = "rgb"
