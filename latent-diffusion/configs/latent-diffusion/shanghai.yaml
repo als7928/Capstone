@@ -9,7 +9,7 @@ model:
     loss_type: l1
     first_stage_key: density
     cond_stage_key: rgb
-    image_size: 128 # 고려해보아야 함 64
+    image_size: 64 # 고려해보아야 함 64
     channels: 3
     concat_mode: true
     cond_stage_trainable: true
@@ -26,7 +26,7 @@ model:
     unet_config:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
-        image_size: 128 #64 
+        image_size: 64 #64 
         in_channels: 6
         out_channels: 3
         model_channels: 128
