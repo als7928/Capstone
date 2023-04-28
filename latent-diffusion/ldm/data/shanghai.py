@@ -83,7 +83,7 @@ class ShanghaiBase(Dataset):
                 # image = self.flip(image)
                 image = TF.hflip(image)
             image = np.array(image).astype(np.uint8)
-            #image = (image / 127.5 - 1.0).astype(np.float32)
+            #image = (image / 127.5 - 1.0).astype(np.float32)<-normalize 2번 적용
             if idx == 0:
                 key = "density"
             else: key = "rgb"
