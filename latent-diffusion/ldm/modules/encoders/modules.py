@@ -149,7 +149,7 @@ class FrozenCLIPTextEmbedder(nn.Module):
         super().__init__()
         self.model, _ = clip.load(version, jit=False, device="cpu")
         self.device = device
-        self.max_length = max_length
+        self.max_length = max_length 
         self.n_repeat = n_repeat
         self.normalize = normalize
 
