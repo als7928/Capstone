@@ -10,7 +10,7 @@ model:
     first_stage_key: density
     cond_stage_key: rgb
     image_size: 128 #  64 -> 128
-    channels: 1 # 3-> 1, Gray
+    channels: 3 # 3-> 1, Gray
     # concat_mode: true
     conditioning_key: crossattn
     cond_stage_trainable: true
@@ -58,8 +58,8 @@ model:
           double_z: false
           z_channels: 3 # z 채널
           resolution: 256
-          in_channels: 1 # 3-> 1 로 변경
-          out_ch: 1 # 3 -> 1로 변경
+          in_channels: 3
+          out_ch: 3
           ch: 128
           ch_mult:
           - 1
