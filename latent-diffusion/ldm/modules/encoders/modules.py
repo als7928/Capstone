@@ -16,6 +16,7 @@ from ldm.modules.x_transformer import Encoder, TransformerWrapper  # TODO: can w
 
 class AbstractEncoder(nn.Module):
     def __init__(self):
+        print('abstract')
         super().__init__()
 
     def encode(self, *args, **kwargs):
@@ -173,20 +174,23 @@ class FrozenCLIPTextEmbedder(nn.Module):
         return z
 
 
-class FrozenClipImageEmbedder(nn.Module):
+# class FrozenClipImageEmbedder(nn.Module):
+class FrozenClipImageEmbedder(AbstractEncoder):
     """
         Uses the CLIP image encoder.
         """
     def __init__(
             self,
-            model,
+            model='ViT-L/14',
             jit=False,
+            # device='cpu',
             device='cuda' if torch.cuda.is_available() else 'cpu',
             antialias=False,
         ):
         super().__init__()
+        print(model)
         self.model, _ = clip.load(name=model, device=device, jit=jit)
-
+        del self.model.transformer
         self.antialias = antialias
 
         self.register_buffer('mean', torch.Tensor([0.48145466, 0.4578275, 0.40821073]), persistent=False)
@@ -203,9 +207,17 @@ class FrozenClipImageEmbedder(nn.Module):
         return x
 
     def forward(self, x):
+        if isinstance(x, list):
+            print('sadfsafds')
+            # device = self.model.visual.conv1.weight.device
+            # return torch.zeros(1, 768, device=device)
         # x is assumed to be in range [-1,1]
-        return self.model.encode_image(self.preprocess(x))
 
+        return self.model.encode_image(self.preprocess(x)).float()
+
+        # return self.model.encode_image(self.preprocess(x))
+    def encode(self, im):
+        return self(im).unsqueeze(1)
 
 class FrozenOpenCLIPEmbedder(AbstractEncoder):
     """

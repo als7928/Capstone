@@ -10,7 +10,7 @@ model:
     first_stage_key: "jpg"
     cond_stage_key: "jpg"
     image_size: 64
-    channels: 4
+    channels: 4 # z 채널
     cond_stage_trainable: false   # Note: different from the one we trained before
     conditioning_key: crossattn
     monitor: val/loss_simple_ema
