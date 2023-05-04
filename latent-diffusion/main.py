@@ -630,7 +630,7 @@ if __name__ == "__main__":
         print(f"Merged modelckpt-cfg: \n{modelckpt_cfg}")
         if version.parse(pl.__version__) < version.parse('1.4.0'):
             trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
-
+        #print("77777777777777777") #디버깅코드
         # add callback which sets up log directory
         default_callbacks_cfg = {
             "setup_callback": {#학습 시작 전에 필요한 설정을 수행하는 콜백
@@ -666,7 +666,7 @@ if __name__ == "__main__":
         }
         if version.parse(pl.__version__) >= version.parse('1.4.0'):#PyTorch Lightning의 버전이 1.4.0 이상이어야 함
             default_callbacks_cfg.update({'checkpoint_callback': modelckpt_cfg})
-
+        #print("8888888888888") #디버깅 코드
         if "callbacks" in lightning_config:
             callbacks_cfg = lightning_config.callbacks
         else:
@@ -713,7 +713,7 @@ if __name__ == "__main__":
         for k in data.datasets:
             print(f"{k}, {data.datasets[k].__class__.__name__}, {len(data.datasets[k])}")
             print(len(data.datasets[k]))#디버깅 코드
-
+            print("ffffff",data.datasets,"ffffff") #디버깅코드#############################3
         # configure learning rate
         bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
         if not cpu:

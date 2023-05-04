@@ -11,8 +11,8 @@ model:
     cond_stage_key: rgb
     image_size: 64 #  64 -> 128
     channels: 3 # 3-> 1, Gray
-    #concat_mode: true
-    conditioning_key: crossattn
+    #concat_mode: true#이걸로 하면 정상 동작
+    conditioning_key: crossattn 
     cond_stage_trainable: true
 
     scheduler_config: # 10000 warmup steps
@@ -34,9 +34,9 @@ model:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
         image_size: 64 #64->128  , unused 라는데 << 무슨 의미? 좀 더 조사 필요
-        in_channels: 3 # 6->3, Cross Attention후 z 채널, latent space
+        in_channels: 3 # concat으로 정상동작하려면 6
         out_channels: 3 # z 채널. latent space
-        model_channels: 128 # 128
+        model_channels: 128 # 128 -> 320
         attention_resolutions:
         - 32 # 32
         - 16 # 16
@@ -47,11 +47,7 @@ model:
         - 2 
         - 8
         num_heads: 8
-        use_spatial_transformer: True
-        transformer_depth: 1
-        context_dim: 768
-        use_checkpoint: True
-        legacy: False
+
 
     first_stage_config:
       target: ldm.models.autoencoder.VQModelInterface
@@ -77,13 +73,13 @@ model:
           target: torch.nn.Identity
 
     cond_stage_config:
-      #target: ldm.modules.encoders.modules.SpatialRescaler # 원본
-      target: ldm.modules.encoders.modules.FrozenClipImageEmbedder
+      target: ldm.modules.encoders.modules.SpatialRescaler # 원본
+      #target: ldm.modules.encoders.modules.FrozenClipImageEmbedder
       #target: ldm.modules.encoders.modules.FrozenOpenCLIPImageEmbedder
-      #params:
-      #  n_stages: 2
-      #  in_channels: 3 # rgb의 차원
-      #  out_channels: 3 # z의 차원
+      params:
+        n_stages: 2
+        in_channels: 3 # rgb의 차원
+        out_channels: 3 # z의 차원
 
 data:
   target: main.DataModuleFromConfig
@@ -92,7 +88,7 @@ data:
     num_workers: 5 # 조사 후 변경 
     wrap: False
     train:
-      target: ldm.data.shanghai.ShanghaiTrain
+      target: ldm.data.shanghai.ShanghaiTraintw
       params:
         size: 256 #512 # 256 -> 512
 

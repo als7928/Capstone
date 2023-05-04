@@ -1401,7 +1401,7 @@ class LatentDiffusion(DDPM):
         if self.unet_trainable == "attn":
             print("Training only unet attention layers")
             for n, m in self.model.named_modules():
-                if isinstance(m, CrossAttention) and n.endswith('attn2'):
+                if isinstance(m, CrossAttention) and n.endswith('attn2'): #CrossAttention사용하는 곳
                     params.extend(m.parameters())
         if self.unet_trainable == "conv_in":
             print("Training only unet input conv layers")
@@ -1447,6 +1447,7 @@ class DiffusionWrapper(pl.LightningModule):
     def __init__(self, diff_model_config, conditioning_key):
         super().__init__()
         self.diffusion_model = instantiate_from_config(diff_model_config)
+        print("yyyyyyyyyyyyyyyyyyyyyy",conditioning_key,"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
         self.conditioning_key = conditioning_key
         assert self.conditioning_key in [None, 'concat', 'crossattn', 'hybrid', 'adm', 'hybrid-adm']
 
@@ -1456,7 +1457,8 @@ class DiffusionWrapper(pl.LightningModule):
         elif self.conditioning_key == 'concat':
             xc = torch.cat([x] + c_concat, dim=1)
             out = self.diffusion_model(xc, t)
-        elif self.conditioning_key == 'crossattn':
+        elif self.conditioning_key == 'crossattn': # crossattention파트
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             cc = torch.cat(c_crossattn, 1)
             out = self.diffusion_model(x, t, context=cc)
         elif self.conditioning_key == 'hybrid':
