@@ -87,17 +87,18 @@ class ShanghaiBase(Dataset):
             if idx == 0:
                 key = "density"
             else: key = "rgb"
-            example[key] = (image / 127.5 - 1.0).astype(np.float32)
+            example[key] = (image / 127.5 - 1.0).astype(np.float32)+1e-6
         # example["image"] = (image / 127.5 - 1.0).astype(np.float32)
         # return example
+        #print("tttttttttttttttttt",example,"tttttttttttttttttttt")
         return example
 
 
 class ShanghaiTrain(ShanghaiBase):
     def __init__(self, **kwargs):
-        super().__init__(data_dir="../train/train_data/train_density",**kwargs)
+        super().__init__(data_dir="../train/train_data/train_density2",**kwargs)
 
 
 class ShanghaiValidation(ShanghaiBase):
     def __init__(self, **kwargs):
-        super().__init__(data_dir="../valid/valid_data/valid_density",**kwargs)
+        super().__init__(data_dir="../valid/valid_data/valid_density2",**kwargs)

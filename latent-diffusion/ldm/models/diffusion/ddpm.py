@@ -85,7 +85,7 @@ class DDPM(pl.LightningModule):
         self.channels = channels
         self.use_positional_encodings = use_positional_encodings
         self.model = DiffusionWrapper(unet_config, conditioning_key)
-        print("000000000000",self.model,"00000000000")
+        #print("000000000000",self.model,"00000000000")
         count_params(self.model, verbose=True)
         self.use_ema = use_ema
         if self.use_ema:
@@ -1405,6 +1405,7 @@ class DiffusionWrapper(pl.LightningModule):
         assert self.conditioning_key in [None, 'concat', 'crossattn', 'hybrid', 'adm']
 
     def forward(self, x, t, c_concat: list = None, c_crossattn: list = None):
+        #print(">>>>>>>>>>>>>>>>>>",c_crossattn,"<<<<<<<<<<<<<<<<<<")
         if self.conditioning_key is None:
             out = self.diffusion_model(x, t)
         elif self.conditioning_key == 'concat':
@@ -1412,9 +1413,10 @@ class DiffusionWrapper(pl.LightningModule):
             out = self.diffusion_model(xc, t)
         elif self.conditioning_key == 'crossattn':
             #print("--------------------",c_crossattn,"------------") #c_crossattn값이 어디로부터 오는지 찾아야 함
-            cc = torch.cat(c_crossattn, 1)
-            #print("++++++++++++",cc,"+++++++++++++++") #여기서부터 nan값이 들어간다.
-            out = self.diffusion_model(x, t, context=cc)
+            with torch.autocast("cuda"):
+                cc = torch.cat(c_crossattn, 1)
+                #print("++++++++++++",cc,"+++++++++++++++",cc.size()) #여기서부터 nan값이 들어간다.
+                out = self.diffusion_model(x, t, context=cc)
         elif self.conditioning_key == 'hybrid':
             xc = torch.cat([x] + c_concat, dim=1)
             cc = torch.cat(c_crossattn, 1)

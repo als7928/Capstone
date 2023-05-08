@@ -763,7 +763,8 @@ if __name__ == "__main__":
             
             try:
 #Trainer는 Pytorch Lightning라이브러리에서 제공하는 모델 학습 시스템
-                trainer.fit(model, data) #모델 학습을 시작하기 위해 fit()함수를 제공한다.
+                with torch.autocast("cuda"):
+                    trainer.fit(model, data) #모델 학습을 시작하기 위해 fit()함수를 제공한다.
             except Exception:
                 melk()
                 raise

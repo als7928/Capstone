@@ -36,7 +36,7 @@ model:
         image_size: 64 #64->128  , unused 라는데 << 무슨 의미? 좀 더 조사 필요
         in_channels: 3 # 6->3, Cross Attention후 z 채널, latent space
         out_channels: 3 # z 채널. latent space
-        model_channels: 128 # 128
+        model_channels: 256 # 128
         attention_resolutions:
         - 32 # 32
         - 16 # 16
@@ -49,7 +49,7 @@ model:
         num_heads: 8
         use_spatial_transformer: True
         transformer_depth: 1
-        context_dim: 768
+        context_dim: 512 #768
         use_checkpoint: True
         legacy: False
 
@@ -62,7 +62,7 @@ model:
         ddconfig:
           double_z: false
           z_channels: 3 # z 채널
-          resolution: 256
+          resolution: 512
           in_channels: 3 # gray
           out_ch: 3
           ch: 128
@@ -78,28 +78,31 @@ model:
 
     cond_stage_config:
       #target: ldm.modules.encoders.modules.SpatialRescaler # 원본
-      target: ldm.modules.encoders.modules.FrozenClipImageEmbedder
+      # target: ldm.modules.encoders.modules.FrozenClipImageEmbedder
       #target: ldm.modules.encoders.modules.FrozenOpenCLIPImageEmbedder
       #params:
       #  n_stages: 2
       #  in_channels: 3 # rgb의 차원
       #  out_channels: 3 # z의 차원
+      target: ldm.modules.encoders.modules.FrozenClipImageEmbedder2
+      params:
+        model: ViT-B/32
 
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 12 # 조사 후 변경 원래 12
+    batch_size: 2 # 조사 후 변경 원래 12
     num_workers: 5 # 조사 후 변경 
     wrap: False
     train:
       target: ldm.data.shanghai.ShanghaiTrain
       params:
-        size: 256 #512 # 256 -> 512
+        size: 512 # 256 -> 512
 
     validation:
       target: ldm.data.shanghai.ShanghaiValidation
       params:
-        size: 256 #512 # 256->512
+        size: 512 # 256->512
 
 lightning:
   callbacks:
@@ -112,6 +115,6 @@ lightning:
 
 
   trainer:
-    accelerator: ddp
-    gpus: 1
+    #accelerator: ddp
+    #gpus: 1
     benchmark: True

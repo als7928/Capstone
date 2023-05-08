@@ -11,7 +11,7 @@ from einops import rearrange, repeat
 import kornia
 from torch.utils.checkpoint import checkpoint
 
-#from ldm.modules.x_transformer import Encoder, TransformerWrapper  # TODO: can we directly rely on lucidrains code and simply add this as a reuirement? --> test
+from ldm.modules.x_transformer import Encoder, TransformerWrapper  # TODO: can we directly rely on lucidrains code and simply add this as a reuirement? --> test
 from xformers import *
 
 class AbstractEncoder(nn.Module):
@@ -174,6 +174,42 @@ class FrozenCLIPTextEmbedder(nn.Module):
         z = repeat(z, 'b 1 d -> b k d', k=self.n_repeat)
         return z
 
+class FrozenClipImageEmbedder2(nn.Module):
+    """
+        Uses the CLIP image encoder.
+        """
+    def __init__(
+            self,
+            model,
+            jit=False,
+            device='cuda' if torch.cuda.is_available() else 'cpu',
+            antialias=False,
+        ):
+        super().__init__()
+        self.model, _ = clip.load(name=model, device=device, jit=jit)
+
+        self.antialias = antialias
+
+        self.register_buffer('mean', torch.Tensor([0.48145466, 0.4578275, 0.40821073]), persistent=False)
+        self.register_buffer('std', torch.Tensor([0.26862954, 0.26130258, 0.27577711]), persistent=False)
+
+    def preprocess(self, x):
+        # normalize to [0,1]
+        x = kornia.geometry.resize(x, (224, 224),
+                                   interpolation='bicubic',align_corners=True,
+                                   antialias=self.antialias)
+        x = (x + 1.) / 2.
+        # renormalize according to clip
+        x = kornia.enhance.normalize(x, self.mean, self.std)
+        return x
+
+    def forward(self, x):
+        # x is assumed to be in range [-1,1]
+        return self.model.encode_image(self.preprocess(x))
+    
+    def encode(self, im):
+        return self(im).unsqueeze(1)
+
 
 #class FrozenClipImageEmbedder(nn.Module):
 class FrozenClipImageEmbedder(AbstractEncoder):
@@ -214,6 +250,7 @@ class FrozenClipImageEmbedder(AbstractEncoder):
             return torch.zeros(1, 768, device=device)
         # x is assumed to be in range [-1,1]
         #print("ddddd", x)
+        #print("++++++++++",x.size(),"++++++++++")
         x=self.model.encode_image(self.preprocess(x)).float() #원래 있던 코드
         #x=self.preprocess(x).float()
 
@@ -229,6 +266,8 @@ class FrozenClipImageEmbedder(AbstractEncoder):
         # return self.model.encode_image(self.preprocess(x))
     def encode(self, im):
         return self(im).unsqueeze(1)
+    #def encode(self, x):
+        #return self(x.reshape(4,3,-1))
 
 class FrozenOpenCLIPImageEmbedder(AbstractEncoder):
     """

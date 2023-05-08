@@ -168,15 +168,15 @@ class CrossAttention(nn.Module):
         )
 
     def forward(self, x, context=None, mask=None):
+        # with torch.autocast("cuda"):
         h = self.heads
 
         q = self.to_q(x)
-        #print("555555555555",context,"55555555555555") #context=None이 되는 경우에 nan값이 들어간다.
+        print("555555555555",context,"55555555555555") #context=None이 되는 경우에 nan값이 들어간다.
         context = default(context, x) # context에 nan값이 들어간다.
-        #print("66666666666",context,"66666666667777777777",x,"7777777777777")
-        k = self.to_k(context)
+        print("66666666666",context,"66666666667777777777",x,"7777777777777")
         v = self.to_v(context)
-
+        k = self.to_k(context)
         q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> (b h) n d', h=h), (q, k, v))
         #print("0000",q,"1111",k,v,"22222")#디버깅 코드
         sim = einsum('b i d, b j d -> b i j', q, k) * self.scale

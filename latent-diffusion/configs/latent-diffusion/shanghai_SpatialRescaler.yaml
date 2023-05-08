@@ -88,7 +88,7 @@ data:
     num_workers: 5 # 조사 후 변경 
     wrap: False
     train:
-      target: ldm.data.shanghai.ShanghaiTraintw
+      target: ldm.data.shanghai.ShanghaiTrain
       params:
         size: 256 #512 # 256 -> 512
 
