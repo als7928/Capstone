@@ -87,7 +87,7 @@ class ShanghaiBase(Dataset):
             if idx == 0:
                 key = "density"
             else: key = "rgb"
-            example[key] = (image / 127.5 - 1.0).astype(np.float32)+1e-6
+            example[key] = (image / 127.5 - 1.0).astype(np.float32)
         # example["image"] = (image / 127.5 - 1.0).astype(np.float32)
         # return example
         #print("tttttttttttttttttt",example,"tttttttttttttttttttt")

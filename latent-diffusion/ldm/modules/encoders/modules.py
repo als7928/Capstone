@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from functools import partial
-
+import torch.nn.functional as F #추가 코드
 #추가코드
 #import openai
 from torch.cuda.amp import autocast
@@ -305,6 +305,8 @@ class FrozenOpenCLIPImageEmbedder(AbstractEncoder):
         x = (x + 1.) / 2.
         # renormalize according to clip
         x = kornia.enhance.normalize(x, self.mean, self.std).float()
+
+
         return x
 
     def freeze(self):

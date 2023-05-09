@@ -13,7 +13,7 @@ model:
     channels: 3 # 3-> 1, Gray
     #concat_mode: true
     conditioning_key: crossattn
-    cond_stage_trainable: true
+    cond_stage_trainable: false #true
 
     scheduler_config: # 10000 warmup steps
       target: ldm.lr_scheduler.LambdaLinearScheduler # ldm.lr_scheduler.LambdaWarmUpCosineScheduler
@@ -49,9 +49,10 @@ model:
         num_heads: 8
         use_spatial_transformer: True
         transformer_depth: 1
-        context_dim: 512 #768
+        context_dim: 768
         use_checkpoint: True
         legacy: False
+        #unet_trainable: attn
 
     first_stage_config:
       target: ldm.models.autoencoder.VQModelInterface
@@ -78,15 +79,14 @@ model:
 
     cond_stage_config:
       #target: ldm.modules.encoders.modules.SpatialRescaler # 원본
-      # target: ldm.modules.encoders.modules.FrozenClipImageEmbedder
+      target: ldm.modules.encoders.modules.FrozenClipImageEmbedder
       #target: ldm.modules.encoders.modules.FrozenOpenCLIPImageEmbedder
       #params:
       #  n_stages: 2
       #  in_channels: 3 # rgb의 차원
       #  out_channels: 3 # z의 차원
-      target: ldm.modules.encoders.modules.FrozenClipImageEmbedder2
-      params:
-        model: ViT-B/32
+      #target: ldm.modules.encoders.modules.FrozenOpenCLIPImageEmbedder
+
 
 data:
   target: main.DataModuleFromConfig
@@ -97,12 +97,12 @@ data:
     train:
       target: ldm.data.shanghai.ShanghaiTrain
       params:
-        size: 512 # 256 -> 512
+        size: 256 # 256 -> 512
 
     validation:
       target: ldm.data.shanghai.ShanghaiValidation
       params:
-        size: 512 # 256->512
+        size: 256 # 256->512
 
 lightning:
   callbacks:

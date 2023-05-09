@@ -268,7 +268,10 @@ class VQModelInterface(VQModel):
 
     def encode(self, x):
         h = self.encoder(x)
+        #print("ggggggggggggggggggggggg",x,"gggggggggggggggggggg",x.size())
+        #print("ffffffffffffffffffffffff",h,"ffffffffffffffffffff",h.size())
         h = self.quant_conv(h)
+        #print("pppppppppppppppppppppp",h,"pppppppppppppppppppppp",h.size())
         return h
 
     def decode(self, h, force_not_quantize=False):

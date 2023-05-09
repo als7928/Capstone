@@ -108,6 +108,6 @@ lightning:
 
 
   trainer:
-    accelerator: ddp
-    gpus: 1
+    #accelerator: ddp
+    #gpus: 1
     benchmark: True
