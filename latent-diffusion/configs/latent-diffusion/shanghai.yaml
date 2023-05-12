@@ -91,7 +91,7 @@ model:
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 2 # 조사 후 변경 원래 12
+    batch_size: 12 # 조사 후 변경 원래 12
     num_workers: 5 # 조사 후 변경 
     wrap: False
     train:

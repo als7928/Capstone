@@ -102,3 +102,8 @@ class ShanghaiTrain(ShanghaiBase):
 class ShanghaiValidation(ShanghaiBase):
     def __init__(self, **kwargs):
         super().__init__(data_dir="../valid/valid_data/valid_density2",**kwargs)
+        
+        
+class ShanghaiTest(ShanghaiBase):
+    def __init__(self, **kwargs):
+        super().__init__(data_dir="../valid/valid_data/valid_density2",**kwargs)
