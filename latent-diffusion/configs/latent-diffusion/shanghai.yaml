@@ -77,7 +77,11 @@ model:
         n_stages: 2
         in_channels: 3 # rgb의 차원
         out_channels: 3 # z의 차원
-
+    # cond_stage_config:
+    #   target: ldm.modules.encoders.modules.FrozenOpenCLIPEmbedder
+    #   params:
+    #     freeze: True
+    #     layer: "penultimate"
 data:
   target: main.DataModuleFromConfig
   params:
