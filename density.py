@@ -52,6 +52,7 @@ def create_dmap(img, gtLocation, depth, sigma, downscale=1.0):
     height = math.floor(height / downscale)
     raw_loc = gtLocation
     gtLocation = gtLocation / downscale
+    # gaussRange = 25
     gaussRange = 25
     pad = int((gaussRange - 1) / 2)
     densityMap = np.zeros((int(height + gaussRange - 1), int(width + gaussRange - 1)))
@@ -69,7 +70,9 @@ def create_dmap(img, gtLocation, depth, sigma, downscale=1.0):
             # print(depth_mean)
             if depth_mean != 0:
                 kernel = GaussianKernel((25, 25), sigma=sigma / depth_mean)
+                # kernel = GaussianKernel((25, 25), sigma=10*sigma / depth_mean)
             else:
+                # kernel = GaussianKernel((25, 25), sigma=10*sigma)
                 kernel = GaussianKernel((25, 25), sigma=sigma)
             densityMap[yloc - pad:yloc + pad + 1, xloc - pad:xloc + pad + 1] += kernel
     densityMap = densityMap[pad:pad + height, pad:pad + width]
@@ -97,13 +100,13 @@ def load_point(gt_mat):
     
 
 if __name__ == '__main__':
-        imgdir = os.listdir("train/train_data/train_img")
+        imgdir = os.listdir("valid/valid_data/valid_img")
         for i in range(0, len(imgdir)):
-            img = "train/train_data/train_img/"+imgdir[i]
+            img = "valid/valid_data/valid_img/"+imgdir[i]
             depth = imgdir[i].replace("IMG", "DEPTH").replace("png", "mat")
             gt = imgdir[i].replace("IMG", "GT").replace("png", "mat")
-            depth_matfile = "train/train_data/train_depth/"+depth
-            gt_mat = "train/train_data/train_gt/"+gt
+            depth_matfile = "valid/valid_data/valid_depth/"+depth
+            gt_mat = "valid/valid_data/valid_gt/"+gt
             # print(img, depth_matfile, gt_mat)
             img2 = cv2.imread(img)
             # load annotation
@@ -112,12 +115,14 @@ if __name__ == '__main__':
 
             depth = load_depth(depth_matfile)
             loc = load_point(gt_mat)
-            dmap = create_dmap(img2, loc, depth, 0.6, downscale=1.0)
+            dmap = create_dmap(img2, loc, depth, 1.2, downscale=2.0)
             dmap = 20000*dmap
+            # ret,thresh = cv2.threshold(dmap,10,255,0)
             # dmap = dmap.astype(np.uint8)
             # dmap = np.dstack([dmap, dmap, dmap])
             # data = Image.fromarray(dmap)
-            name = "train/train_data/train_density/"+imgdir[i].replace("IMG", "DENSITY")
+            name = "valid/valid_data/valid_density2/"+imgdir[i].replace("IMG", "DENSITY")
+            
             cv2.imwrite(name, dmap)
             # data.save(name)
             # print(i, "번째")

@@ -567,8 +567,9 @@ if __name__ == "__main__":
         #yaml파일의 target:ldm.models.diffusion.ddpm.LatentDiffusion
         #yaml파일의 params의 인덱스들을 인스턴스로 전달(key와 value모두)
         #예를 들어 model.image_size는 64가 된다. model은 LatentDiffusion 클래스이다.
+        # print("ggggggggg") #디버깅용
         model = instantiate_from_config(config.model)
- 
+        # print("ggggggggg") #디버깅용
         # trainer and callbacks
         trainer_kwargs = dict() #학습에 필요한 여러가지 index를 저장하기 위한 빈 dictionary 생성
 
@@ -629,7 +630,7 @@ if __name__ == "__main__":
         print(f"Merged modelckpt-cfg: \n{modelckpt_cfg}")
         if version.parse(pl.__version__) < version.parse('1.4.0'):
             trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
-
+        #print("77777777777777777") #디버깅코드
         # add callback which sets up log directory
         default_callbacks_cfg = {
             "setup_callback": {#학습 시작 전에 필요한 설정을 수행하는 콜백
@@ -665,7 +666,7 @@ if __name__ == "__main__":
         }
         if version.parse(pl.__version__) >= version.parse('1.4.0'):#PyTorch Lightning의 버전이 1.4.0 이상이어야 함
             default_callbacks_cfg.update({'checkpoint_callback': modelckpt_cfg})
-
+        #print("8888888888888") #디버깅 코드
         if "callbacks" in lightning_config:
             callbacks_cfg = lightning_config.callbacks
         else:
@@ -694,7 +695,7 @@ if __name__ == "__main__":
             callbacks_cfg.ignore_keys_callback.params['ckpt_path'] = trainer_opt.resume_from_checkpoint
         elif 'ignore_keys_callback' in callbacks_cfg:
             del callbacks_cfg['ignore_keys_callback']
-
+        
         trainer_kwargs["callbacks"] = [instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg]
 
         #trainer가 train또는 test를 위한 조건을 가지고 있다.
@@ -708,11 +709,11 @@ if __name__ == "__main__":
         # lightning still takes care of proper multiprocessing though
         data.prepare_data()
         data.setup()
-        print("#### Data #####")
+        # print("#### Data #####")
         for k in data.datasets:
             print(f"{k}, {data.datasets[k].__class__.__name__}, {len(data.datasets[k])}")
             print(len(data.datasets[k]))#디버깅 코드
-
+            # print("ffffff",data.datasets,"ffffff") #디버깅코드#############################3
         # configure learning rate
         bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
         if not cpu:
@@ -759,8 +760,10 @@ if __name__ == "__main__":
         #실제로 코드를 수행하는 단계
         # run
         if opt.train: #opt.train이 true이면 training
+            
             try:
 #Trainer는 Pytorch Lightning라이브러리에서 제공하는 모델 학습 시스템
+                #with torch.autocast("cuda"):
                 trainer.fit(model, data) #모델 학습을 시작하기 위해 fit()함수를 제공한다.
             except Exception:
                 melk()

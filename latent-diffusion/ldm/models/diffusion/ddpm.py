@@ -85,6 +85,7 @@ class DDPM(pl.LightningModule):
         self.channels = channels
         self.use_positional_encodings = use_positional_encodings
         self.model = DiffusionWrapper(unet_config, conditioning_key)
+        #print("000000000000",self.model,"00000000000")
         count_params(self.model, verbose=True)
         self.use_ema = use_ema
         if self.use_ema:
@@ -556,7 +557,9 @@ class LatentDiffusion(DDPM):
                 if isinstance(c, DiagonalGaussianDistribution):
                     c = c.mode()
             else:
+                print("AAAAAAAAAAAAAAA",c,"AAAAAAAA",self.cond_stage_model,"BBBBBBBB")
                 c = self.cond_stage_model(c)
+                print("VVVVVVVVV",c,"VVVVVVVVvv")
         else:
             assert hasattr(self.cond_stage_model, self.cond_stage_forward)
             c = getattr(self.cond_stage_model, self.cond_stage_forward)(c)
@@ -710,8 +713,9 @@ class LatentDiffusion(DDPM):
                 z = torch.argmax(z.exp(), dim=1).long()
             z = self.first_stage_model.quantize.get_codebook_entry(z, shape=None)
             z = rearrange(z, 'b h w c -> b c h w').contiguous()
-
+        #print("uuuuuuuuuuuuuuuuuuu",z,"uuuuuuuuuuuuuuuuuuu",z.size())
         z = 1. / self.scale_factor * z
+        #print("vvvvvvvvvvvvvvvvvvv",z,"vvvvvvvvvvvvvvvvvvvv",z.size())
 
         if hasattr(self, "split_input_params"):
             if self.split_input_params["patch_distributed_vq"]:
@@ -872,11 +876,16 @@ class LatentDiffusion(DDPM):
         t = torch.randint(0, self.num_timesteps, (x.shape[0],), device=self.device).long()
         if self.model.conditioning_key is not None:
             assert c is not None
-            if self.cond_stage_trainable:
+            if self.cond_stage_trainable: #shanghai.yaml파일은 여기로 온다.
+                #print("AAAAAAAAAAAA",c,"AAAAAAAAAAA",c.size())
                 c = self.get_learned_conditioning(c)
+                #print("KKKKKKKKKKKK",self.get_learned_conditioning,"KKKKKKKKKKK")
+                #print("BBBBBBBBBBB",c,"BBBBBBBBBBBBBB",c.size())
             if self.shorten_cond_schedule:  # TODO: drop this option
                 tc = self.cond_ids[t].to(self.device)
+                
                 c = self.q_sample(x_start=c, t=tc, noise=torch.randn_like(c.float()))
+            #print("CCCCCCCCCC",c,"CCCCCCCCCCCCC",c.size())
         return self.p_losses(x, c, t, *args, **kwargs)
 
     def _rescale_annotations(self, bboxes, crop_coordinates):  # TODO: move to dataset
@@ -966,7 +975,7 @@ class LatentDiffusion(DDPM):
                 print(adapted_cond.shape)
                 adapted_cond = rearrange(adapted_cond, '(l b) n d -> l b n d', l=z.shape[-1])
                 print(adapted_cond.shape)
-
+                # print("??????????????????",adapted_cond,"????????????????????")
                 cond_list = [{'c_crossattn': [e]} for e in adapted_cond]
 
             else:
@@ -1398,17 +1407,23 @@ class DiffusionWrapper(pl.LightningModule):
     def __init__(self, diff_model_config, conditioning_key):
         super().__init__()
         self.diffusion_model = instantiate_from_config(diff_model_config)
+        #print("yyyyyyyyyyyyyyyyyyyyyy",self.diffusion_model,"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
         self.conditioning_key = conditioning_key
+        #print("yyyyyyyyyyyyyyyyyyyyyy",conditioning_key,"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
         assert self.conditioning_key in [None, 'concat', 'crossattn', 'hybrid', 'adm']
 
     def forward(self, x, t, c_concat: list = None, c_crossattn: list = None):
+        #print(">>>>>>>>>>>>>>>>>>",c_crossattn,"<<<<<<<<<<<<<<<<<<")
         if self.conditioning_key is None:
             out = self.diffusion_model(x, t)
         elif self.conditioning_key == 'concat':
             xc = torch.cat([x] + c_concat, dim=1)
             out = self.diffusion_model(xc, t)
         elif self.conditioning_key == 'crossattn':
+            #print("--------------------",c_crossattn,"------------") #c_crossattn값이 어디로부터 오는지 찾아야 함
+            #with torch.autocast("cuda"):
             cc = torch.cat(c_crossattn, 1)
+                #print("++++++++++++",cc,"+++++++++++++++",cc.size()) #여기서부터 nan값이 들어간다.
             out = self.diffusion_model(x, t, context=cc)
         elif self.conditioning_key == 'hybrid':
             xc = torch.cat([x] + c_concat, dim=1)
