@@ -136,7 +136,6 @@ class SpatialRescaler(nn.Module):
 
         if self.remap_output:
             x = self.channel_mapper(x)
-        #print("qqqqqqqqqqqqqq",x,"qqqqqqqqqq",x.size(),"qqqqqqqq")
         return x
 
     def encode(self, x):

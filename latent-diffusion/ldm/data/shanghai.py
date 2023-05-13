@@ -6,6 +6,70 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 import torchvision.transforms.functional as TF
 
+
+class ShanghaiTestBase(Dataset):
+    def __init__(self,
+                 data_dir,
+                 size=None,
+                 interpolation="bicubic"
+                 ):
+        # self.data_paths = txt_file
+        self.data_dir = data_dir
+        self.cond_paths = []
+        for subdir, dirs, files in os.walk(data_dir):
+            for file in files: #"DENSITY_0201.png"
+                if file.endswith(".png"):
+                    file_path = os.path.join(subdir, file) #"train/train_data/train_density" "/" "DENSITY_0201.png"
+                    self.cond_paths.append(file_path)
+                    
+        # with open(self.data_paths, "r") as f:
+        #     self.image_paths = f.read().splitlines()
+
+
+
+        self._length = len(self.cond_paths)
+        self. labels = {
+            "cond_path_": [l for l in self.cond_paths],
+        }
+
+
+        self.size = size
+        self.interpolation = {"linear": PIL.Image.LINEAR,
+                              "bilinear": PIL.Image.BILINEAR,
+                              "bicubic": PIL.Image.BICUBIC,
+                              "lanczos": PIL.Image.LANCZOS,
+                              }[interpolation]
+
+    def __len__(self):
+        return self._length
+
+    def __getitem__(self, i):
+        # example = dict()
+        example = dict((k, self.labels[k][i]) for k in self.labels)
+        image = Image.open(example["cond_path_"])
+
+        if not image.mode == "RGB": 
+            image = image.convert("RGB")    
+
+        # default to score-sde preprocessing
+        img = np.array(image).astype(np.uint8)
+        crop = min(img.shape[0], img.shape[1])
+        h, w, = img.shape[0], img.shape[1]
+        img = img[(h - crop) // 2:(h + crop) // 2,
+            (w - crop) // 2:(w + crop) // 2]
+
+        image = Image.fromarray(img)
+        if self.size is not None:
+            image = image.resize((self.size, self.size), resample=self.interpolation)
+
+        image = np.array(image).astype(np.uint8)
+        
+        example['rgb'] = (image / 127.5 - 1.0).astype(np.float32)
+            
+        return example
+    
+
+
 class ShanghaiBase(Dataset):
     def __init__(self,
                  data_dir,
@@ -104,6 +168,6 @@ class ShanghaiValidation(ShanghaiBase):
         super().__init__(data_dir="../valid/valid_data/valid_density2",**kwargs)
         
         
-class ShanghaiTest(ShanghaiBase):
+class ShanghaiTest(ShanghaiTestBase):
     def __init__(self, **kwargs):
-        super().__init__(data_dir="../valid/valid_data/valid_density2",**kwargs)
+        super().__init__(data_dir="../test/test_data/test_1imgs",**kwargs)

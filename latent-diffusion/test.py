@@ -32,7 +32,7 @@ def imageloader(image, size=None):
     return example
 
 
-def ldm_cond_sample(config_path, ckpt_path, batch_size):
+def ldm_cond_sample(config_path, ckpt_path, batch_size, name):
     config = OmegaConf.load(config_path)
     model, _ = load_model(config, ckpt_path, None, None)
 
@@ -53,21 +53,22 @@ def ldm_cond_sample(config_path, ckpt_path, batch_size):
 
         samples = model.decode_first_stage(samples)
 
-    save_image(condition, 'cond.png')
-    save_image(samples, 'sample.png')
+    save_image(condition, out_name + '_cond.png')
+    save_image(samples, out_name + '_sample.png')
 
 
 if __name__ == '__main__':
 
+    out_name = "05-10_Spatial_Concat(999epoch)(false)"
     config_path = 'configs/latent-diffusion/shanghai3.yaml' # origin: crossattn, 3: concate
     
-    ckpt_path = 'logs/2023-05-10T09-21-40_shanghai3/checkpoints/last.ckpt' # concate
+    ckpt_path = 'logs/' + out_name + '/checkpoints/last.ckpt' # concate
     
     # ckpt_path = 'logs/2023-05-09T20-17-06_shanghai/checkpoints/last.ckpt' 
 
     # inputimg = Image.open('test1.jpg')
     # image = imageloader(inputimg, 256)
     dataset = shanghai.ShanghaiTest(size=256)
-    ldm_cond_sample(config_path, ckpt_path, batch_size=4)
+    ldm_cond_sample(config_path, ckpt_path, batch_size=1, name = out_name)
 
     # ldm_cond_sample(config_path, ckpt_path, 1, image)
