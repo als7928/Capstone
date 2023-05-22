@@ -9,7 +9,7 @@ model:
     loss_type: l2
     first_stage_key: density
     cond_stage_key: rgb
-    image_size: 64 # 흠.
+    image_size: 64 
     channels: 3
     concat_mode: true
     cond_stage_trainable: false

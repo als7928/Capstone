@@ -59,10 +59,10 @@ def ldm_cond_sample(config_path, ckpt_path, batch_size, name):
 
 if __name__ == '__main__':
 
-    out_name = "05-10_Spatial_Concat(999epoch)(false)"
+    out_name = "05-13_Spatial_Concat(L2)(999epoch)"
     config_path = 'configs/latent-diffusion/shanghai3.yaml' # origin: crossattn, 3: concate
     
-    ckpt_path = 'logs/' + out_name + '/checkpoints/last.ckpt' # concate
+    ckpt_path = 'logs/' + out_name + '/checkpoints/epoch=000275.ckpt' # concate
     
     # ckpt_path = 'logs/2023-05-09T20-17-06_shanghai/checkpoints/last.ckpt' 
 

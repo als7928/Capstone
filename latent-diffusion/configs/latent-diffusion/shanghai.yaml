@@ -11,7 +11,6 @@ model:
     cond_stage_key: rgb
     image_size: 64 #  64 -> 128
     channels: 3 # 3-> 1, Gray
-    #concat_mode: true
     conditioning_key: crossattn
     cond_stage_trainable: false #true
 
@@ -78,11 +77,7 @@ model:
           target: torch.nn.Identity
 
     cond_stage_config:
-      target: ldm.modules.encoders.modules.SpatialRescaler # 수정
-      params:
-        n_stages: 2
-        in_channels: 3 # rgb의 차원
-        out_channels: 3 # z의 차원
+      target: ldm.modules.encoders.modules.FrozenClipImageEmbedder # 수정
 
 data:
   target: main.DataModuleFromConfig

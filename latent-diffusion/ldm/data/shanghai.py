@@ -170,4 +170,4 @@ class ShanghaiValidation(ShanghaiBase):
         
 class ShanghaiTest(ShanghaiTestBase):
     def __init__(self, **kwargs):
-        super().__init__(data_dir="../test/test_data/test_1imgs",**kwargs)
+        super().__init__(data_dir="../test/test_data/test_2imgs",**kwargs)
