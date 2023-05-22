@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     # inputimg = Image.open('test1.jpg')
     # image = imageloader(inputimg, 256)
-    dataset = shanghai.ShanghaiTest(size=256)
+    dataset = shanghai.ShanghaiTest(size=512)
     ldm_cond_sample(config_path, ckpt_path, batch_size=1, name = out_name)
 
     # ldm_cond_sample(config_path, ckpt_path, 1, image)

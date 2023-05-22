@@ -86,12 +86,12 @@ data:
     num_workers: 5 # 조사 후 변경 
     wrap: False
     train:
-      target: ldm.data.shanghai.ShanghaiTrain
+      target: ldm.data.shanghai_10000.ShanghaiTrain
       params:
         size: 512 # 256 -> 512
 
     validation:
-      target: ldm.data.shanghai.ShanghaiValidation
+      target: ldm.data.shanghai_10000.ShanghaiValidation
       params:
         size: 512 # 256->512
 

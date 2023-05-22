@@ -82,16 +82,16 @@ model:
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 12 # 조사 후 변경 원래 12
+    batch_size: 6 # 조사 후 변경 원래 12
     num_workers: 5 # 조사 후 변경 
     wrap: False
     train:
-      target: ldm.data.shanghai.ShanghaiTrain
+      target: ldm.data.shanghai_5000.ShanghaiTrain
       params:
         size: 512 # 256 -> 512
 
     validation:
-      target: ldm.data.shanghai.ShanghaiValidation
+      target: ldm.data.shanghai_5000.ShanghaiValidation
       params:
         size: 512 # 256->512
 

@@ -160,12 +160,12 @@ class ShanghaiBase(Dataset):
 
 class ShanghaiTrain(ShanghaiBase):
     def __init__(self, **kwargs):
-        super().__init__(data_dir="../train/train_data/train_density1200",**kwargs)
+        super().__init__(data_dir="../train/train_data/train_density5000",**kwargs)
 
 
 class ShanghaiValidation(ShanghaiBase):
     def __init__(self, **kwargs):
-        super().__init__(data_dir="../valid/valid_data/valid_density1200",**kwargs)
+        super().__init__(data_dir="../valid/valid_data/valid_density5000",**kwargs)
         
         
 class ShanghaiTest(ShanghaiTestBase):
