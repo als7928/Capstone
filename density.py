@@ -135,14 +135,14 @@ def load_point(gt_mat):
     
 
 if __name__ == '__main__':
-        imgdir = os.listdir("valid/valid_data/valid_img")
+        imgdir = os.listdir("train/train_data/train_img")
         maxx_arr = []
         for i in range(0, len(imgdir)):
-            img = "valid/valid_data/valid_img/"+imgdir[i]
+            img = "train/train_data/train_img/"+imgdir[i]
             depth = imgdir[i].replace("IMG", "DEPTH").replace("png", "mat")
             gt = imgdir[i].replace("IMG", "GT").replace("png", "mat")
-            depth_matfile = "valid/valid_data/valid_depth/"+depth
-            gt_mat = "valid/valid_data/valid_gt/"+gt
+            depth_matfile = "train/train_data/train_depth/"+depth
+            gt_mat = "train/train_data/train_gt/"+gt
             # print(img, depth_matfile, gt_mat)
             img2 = cv2.imread(img)
             height, width, cns = img2.shape
@@ -155,24 +155,24 @@ if __name__ == '__main__':
             loc = load_point(gt_mat)
             # dmap = cv_dmap(img2, loc, depth, 1.2, downscale=2.0)
             
-            dmap, maxx = create_dmap(img2, loc, depth, 1.2, downscale=2.0)
+            dmap, maxx = create_dmap(img2, loc, depth, 10, downscale=2.0)
             maxx_arr.append(maxx)
             ## 0~1
             # print(maxx)
             # print(imgdir[i], np.sum(dmap)) # 사람수
             # dmap = 255 *dmap / maxx
-            dmap = 10000*dmap
+            dmap = 30000*dmap
             # dmap = 20000*dmap
             
             # ret,thresh = cv2.threshold(dmap,10,255,0)
             # dmap = dmap.astype(np.uint8)
             # dmap = np.dstack([dmap, dmap, dmap])
             # data = Image.fromarray(dmap)
-            name = "valid/valid_data/valid_density10000/"+imgdir[i].replace("IMG", "DENSITY")
+            name = "train/train_data/train_density_gaus/"+imgdir[i].replace("IMG", "DENSITY")
             # dmap = cv2.resize(dmap, (raw_width, raw_height), interpolation=cv2.INTER_CUBIC)
             
             cv2.imwrite(name, dmap)
             # data.save(name)
             # print(i, "번째")
-        print(np.mean(maxx_arr))
+        print(np.max(maxx_arr))
         print("done")
