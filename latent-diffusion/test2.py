@@ -89,10 +89,10 @@ def ldm_cond_sample(config_path, ckpt_path, batch_size, out_name):
 
 if __name__ == '__main__':
 
-    image_name = "/data/Capstone/test/test_data/test_2imgs/IMG_0052.png"
-    config_path = 'configs/latent-diffusion/shanghai_10000.yaml' # origin: crossattn, 3: concate
+    image_name = "/data/Capstone/test/test_data/test_2imgs/IMG_0020.png"
+    config_path = 'configs/latent-diffusion/shanghai_gaus.yaml' # origin: crossattn, 3: concate
     
-    ckpt_path = 'logs/' + '2023-05-24T21-07-27_shanghai_10000' + '/checkpoints/epoch=000371.ckpt' # concate
+    ckpt_path = 'logs/' + '2023-05-26T16-05-56_shanghai_gaus' + '/checkpoints/epoch=000152.ckpt' # concate
     
     # ckpt_path = 'logs/2023-05-09T20-17-06_shanghai/checkpoints/last.ckpt' 
 

@@ -88,12 +88,12 @@ data:
     train:
       target: ldm.data.shanghai_gaus.ShanghaiTrain
       params:
-        size: 512 # 256 -> 512
+        size: 256 # 256 -> 512
 
     validation:
       target: ldm.data.shanghai_gaus.ShanghaiValidation
       params:
-        size: 512 # 256->512
+        size: 256 # 256->512
 
 lightning:
   callbacks:
