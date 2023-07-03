@@ -712,8 +712,8 @@ if __name__ == "__main__":
         # print("#### Data #####")
         for k in data.datasets:
             print(f"{k}, {data.datasets[k].__class__.__name__}, {len(data.datasets[k])}")
-            print(len(data.datasets[k]))#디버깅 코드
-            # print("ffffff",data.datasets,"ffffff") #디버깅코드#############################3
+            print(len(data.datasets[k]))#디버깅 코드0829
+            # print("ffffff",data.datasets,"ffffff") #디버깅코드#############################30829
         # configure learning rate
         bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
         if not cpu:

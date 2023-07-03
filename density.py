@@ -103,10 +103,11 @@ def create_dmap(img, gtLocation, depth, sigma, downscale=1.0):
             # print(depth_mean)
             
             if depth_mean != 0:
-                kernel = GaussianKernel((25, 25), sigma=sigma / depth_mean)
-                # kernel = GaussianKernel((25, 25), sigma=10*sigma / depth_mean)
+                # kernel = GaussianKernel((25, 25), sigma=sigma/ depth_mean)
+                kernel = GaussianKernel((25, 25), sigma=sigma)
+                #kernel = GaussianKernel((25, 25), sigma=10*sigma / depth_mean)
             else:
-                # kernel = GaussianKernel((25, 25), sigma=10*sigma)
+                #kernel = GaussianKernel((25, 25), sigma=10*sigma)
                 kernel = GaussianKernel((25, 25), sigma=sigma)
             densityMap[yloc - pad:yloc + pad + 1, xloc - pad:xloc + pad + 1] += kernel
     densityMap = densityMap[pad:pad + height, pad:pad + width]
@@ -135,14 +136,14 @@ def load_point(gt_mat):
     
 
 if __name__ == '__main__':
-        imgdir = os.listdir("train/train_data/train_img")
+        imgdir = os.listdir("valid/valid_data/valid_img")
         maxx_arr = []
         for i in range(0, len(imgdir)):
-            img = "train/train_data/train_img/"+imgdir[i]
+            img = "valid/valid_data/valid_img/"+imgdir[i]
             depth = imgdir[i].replace("IMG", "DEPTH").replace("png", "mat")
             gt = imgdir[i].replace("IMG", "GT").replace("png", "mat")
-            depth_matfile = "train/train_data/train_depth/"+depth
-            gt_mat = "train/train_data/train_gt/"+gt
+            depth_matfile = "valid/valid_data/valid_depth/"+depth
+            gt_mat = "valid/valid_data/valid_gt/"+gt
             # print(img, depth_matfile, gt_mat)
             img2 = cv2.imread(img)
             height, width, cns = img2.shape
@@ -155,24 +156,37 @@ if __name__ == '__main__':
             loc = load_point(gt_mat)
             # dmap = cv_dmap(img2, loc, depth, 1.2, downscale=2.0)
             
-            dmap, maxx = create_dmap(img2, loc, depth, 10, downscale=2.0)
+            dmap, maxx = create_dmap(img2, loc, depth, 0.5, downscale=2.0)
             maxx_arr.append(maxx)
             ## 0~1
             # print(maxx)
             # print(imgdir[i], np.sum(dmap)) # 사람수
             # dmap = 255 *dmap / maxx
-            dmap = 30000*dmap
-            # dmap = 20000*dmap
+            dmap = 205*dmap
+            #일단 보류
+            #dmap3=dmap+10e-13
+            #print(dmap3.sum())
+            #print(dmap,dmap.max(),dmap.sum())
+            #dmap=255.*(dmap/dmap.max()-dmap.min()) #stretching
+            # dmap = 30000*dmap
+            # print(dmap.max(),dmap.min(), dmap.sum())
+            
+            #dmap2=(dmap/255.)
+            
+            #print("9999",dmap2.sum())
+            #print("d",dmap.sum()/10000)
+            
+            
             
             # ret,thresh = cv2.threshold(dmap,10,255,0)
             # dmap = dmap.astype(np.uint8)
             # dmap = np.dstack([dmap, dmap, dmap])
             # data = Image.fromarray(dmap)
-            name = "train/train_data/train_density_gaus/"+imgdir[i].replace("IMG", "DENSITY")
+            name = "valid/valid_data/valid_density_amh/"+imgdir[i].replace("IMG", "DENSITY")
             # dmap = cv2.resize(dmap, (raw_width, raw_height), interpolation=cv2.INTER_CUBIC)
             
             cv2.imwrite(name, dmap)
             # data.save(name)
             # print(i, "번째")
-        print(np.max(maxx_arr))
+        # print(np.mean(maxx_arr))
         print("done")

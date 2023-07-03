@@ -17,6 +17,7 @@ from functools import partial
 from tqdm import tqdm
 from torchvision.utils import make_grid
 from pytorch_lightning.utilities.distributed import rank_zero_only
+from torch.nn import functional as F
 
 from ldm.util import log_txt_as_img, exists, default, ismap, isimage, mean_flat, count_params, instantiate_from_config
 from ldm.modules.ema import LitEma
@@ -24,8 +25,8 @@ from ldm.modules.distributions.distributions import normal_kl, DiagonalGaussianD
 from ldm.models.autoencoder import VQModelInterface, IdentityFirstStage, AutoencoderKL
 from ldm.modules.diffusionmodules.util import make_beta_schedule, extract_into_tensor, noise_like
 from ldm.models.diffusion.ddim import DDIMSampler
-
-
+from torchvision import models, transforms
+from torchvision.utils import save_image
 __conditioning_keys__ = {'concat': 'c_concat',
                          'crossattn': 'c_crossattn',
                          'adm': 'y'}
@@ -284,15 +285,17 @@ class DDPM(pl.LightningModule):
             if mean:
                 loss = loss.mean()
         elif self.loss_type == 'l2':
+            #print("11111111111111111",target.shape,target.max(),target.min(),target.sum(),"111111111111111")
+            #print("222222222222222222",pred.shape,pred.max(),pred.min(),pred.sum(),"22222222222222222")
             if mean:
                 loss = torch.nn.functional.mse_loss(target, pred)
             else:
                 loss = torch.nn.functional.mse_loss(target, pred, reduction='none')
         else:
             raise NotImplementedError("unknown loss type '{loss_type}'")
-
         return loss
-
+    
+        
     def p_losses(self, x_start, t, noise=None):
         noise = default(noise, lambda: torch.randn_like(x_start))
         x_noisy = self.q_sample(x_start=x_start, t=t, noise=noise)
@@ -307,7 +310,6 @@ class DDPM(pl.LightningModule):
             raise NotImplementedError(f"Paramterization {self.parameterization} not yet supported")
 
         loss = self.get_loss(model_out, target, mean=False).mean(dim=[1, 2, 3])
-
         log_prefix = 'train' if self.training else 'val'
 
         loss_dict.update({f'{log_prefix}/loss_simple': loss.mean()})
@@ -484,6 +486,7 @@ class LatentDiffusion(DDPM):
             # set rescale weight to 1./std of encodings
             print("### USING STD-RESCALING ###")
             x = super().get_input(batch, self.first_stage_key)
+            # self.x_first = x
             x = x.to(self.device)
             encoder_posterior = self.encode_first_stage(x)
             z = self.get_first_stage_encoding(encoder_posterior).detach()
@@ -1096,6 +1099,7 @@ class LatentDiffusion(DDPM):
                                        quantize_denoised=quantize_denoised,
                                        return_x0=return_x0,
                                        score_corrector=score_corrector, corrector_kwargs=corrector_kwargs)
+
         if return_codebook_ids:
             raise DeprecationWarning("Support dropped.")
             model_mean, _, model_log_variance, logits = outputs
@@ -1162,6 +1166,7 @@ class LatentDiffusion(DDPM):
                                             quantize_denoised=quantize_denoised, return_x0=True,
                                             temperature=temperature[i], noise_dropout=noise_dropout,
                                             score_corrector=score_corrector, corrector_kwargs=corrector_kwargs)
+
             if mask is not None:
                 assert x0 is not None
                 img_orig = self.q_sample(x0, ts)
@@ -1399,7 +1404,12 @@ class LatentDiffusion(DDPM):
         if not hasattr(self, "colorize"):
             self.colorize = torch.randn(3, x.shape[1], 1, 1).to(x)
         x = nn.functional.conv2d(x, weight=self.colorize)
-        x = 2. * (x - x.min()) / (x.max() - x.min()) - 1.
+        if (x.max()-x.min())==0:
+            x = x
+        else:
+            x = 2. * (x - x.min()) / (x.max() - x.min()) - 1.
+        
+        #print("000000000000",torch.sum(x),"00000000000")
         return x
 
 

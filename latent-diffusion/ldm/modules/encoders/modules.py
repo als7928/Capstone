@@ -16,7 +16,6 @@ from xformers import *
 
 class AbstractEncoder(nn.Module):
     def __init__(self):
-        print('abstract')
         super().__init__()
 
     def encode(self, *args, **kwargs):
@@ -237,10 +236,12 @@ class FrozenClipImageEmbedder(AbstractEncoder):
         x = kornia.geometry.resize(x, (224, 224),
                                    interpolation='bicubic',align_corners=True,
                                    antialias=self.antialias)
+        #print("22222222222222222",x.shape,"222222222222222222222",x.sum(),"222222222222222222")#0829
         x = (x + 1.) / 2. 
         # renormalize according to clip
         x = kornia.enhance.normalize(x, self.mean, self.std)
         #print("^^^^^&&&&&&&&&&&&&&&&&",x,"&&&&&&&&&&&&&&&^^^^^",x.size(),"^^")
+        #print("3333333333333333",x.shape,"3333333333333333333",x.sum(),"333333333333333333333")#0829
         return x
 
     def forward(self, x):
@@ -250,6 +251,7 @@ class FrozenClipImageEmbedder(AbstractEncoder):
         # x is assumed to be in range [-1,1]
         #print("ddddd", x)
         #print("++++++++++",x.size(),"++++++++++")
+        #print("1111111111111",x.shape,"111111111111111",x.sum(),"111111111111111")#0829
         x=self.model.encode_image(self.preprocess(x)).float() #원래 있던 코드
         #x=self.preprocess(x).float()
 
@@ -259,8 +261,8 @@ class FrozenClipImageEmbedder(AbstractEncoder):
         #x = nn.functional.conv2d(x, filter_data, stride=3, padding=0)
         #print("bbbbbbbbbbbbbbbbbbbbbb",x,"bbbbbbbbbbbbbbbbbb-++++++++++",x.size(),"++++++++++")
         #x=self.model.encode_image(x)
-        #print("cccccccccccccccccc",x,"ccccccccccccccccc-++++++++++",x.size(),"++++++++++")
-        return x #float 타입 필요
+        #print("4444444444444444",x.shape,"444444444444444444",x.sum(),"44444444444444444")#0829
+        return x #Conditioning은 x_start에 영향 없음 #0829
 
         # return self.model.encode_image(self.preprocess(x))
     def encode(self, im):
@@ -305,6 +307,7 @@ class FrozenOpenCLIPImageEmbedder(AbstractEncoder):
         # renormalize according to clip
         x = kornia.enhance.normalize(x, self.mean, self.std).float()
 
+        print("xxxxxxxxxxxxxxxxxxx",x.shape,x.sum(),"xxxxxxxxxxxxxxxx")#0829
 
         return x
 
@@ -318,6 +321,7 @@ class FrozenOpenCLIPImageEmbedder(AbstractEncoder):
         z = self.encode_with_vision_transformer(image)
         if self.ucg_rate > 0. and not no_dropout:
             z = torch.bernoulli((1. - self.ucg_rate) * torch.ones(z.shape[0], device=z.device))[:, None] * z
+        print()
         return z
 
     def encode_with_vision_transformer(self, img):
