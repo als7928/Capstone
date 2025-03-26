@@ -22,7 +22,7 @@ conda activate ldm
 density_shanghai.py 를 통해 원본 RGB 이미지에 Gaussian kernel을 적용하여 density map을 생성
 
 Conditioning (조건 입력):
-원본 RGB 이미지를 사용하며, 별도의 모델 없이 단순히 rescale 처리를 진행합니다.
+원본 RGB 이미지를 사용하며, 별도의 모델 없이 단순히 rescale 처리를 진행함
 
 데이터 경로:
 ```
@@ -40,9 +40,7 @@ VQ 모델: https://ommer-lab.com/files/latent-diffusion/vq-f4.zip
 다운로드한 모델은 다음 경로에 위치
 ``models/first_stage_models/vq-f4/model.ckpt``
 ## RGB Conditioning Encoding
-별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나 Pretrained FrozenCLIPTextEmbedder 사용
-(SpatialRescaler)
-
+별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나 Pretrained FrozenCLIPEmbedder 사용
 
 # Run
 ```
