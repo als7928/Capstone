@@ -34,11 +34,14 @@ train/train_data/train_img_amh/IMG_*.png           # RGB 이미지 경로
 # Encoding
 ## Density Encoding (First Stage)
 VQ 모델: https://ommer-lab.com/files/latent-diffusion/vq-f4.zip
+
 특징:
   - f = 4
   - VQ embedding space: Z = 8192, latent dim d = 3
+
 다운로드한 모델은 다음 경로에 위치
 ``models/first_stage_models/vq-f4/model.ckpt``
+
 ## RGB Conditioning Encoding
 별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나 Pretrained FrozenCLIPEmbedder 사용
 
