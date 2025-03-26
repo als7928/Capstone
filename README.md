@@ -46,7 +46,7 @@ Pretrained VQ 모델 사용 https://ommer-lab.com/files/latent-diffusion/vq-f4.z
 ## RGB Conditioning Encoding
 별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나 Pretrained FrozenCLIPEmbedder 사용 가능
 
-# Run
+# Train
 ```
 python latent-diffusion/main.py --base configs/latent-diffusion/shanghai_amh.yaml -t --gpus 0, 
 ```
