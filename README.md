@@ -40,7 +40,7 @@ Pretrained VQ 모델 사용 https://ommer-lab.com/files/latent-diffusion/vq-f4.z
   - 4x downsample (f = 4)
   - VQ embedding space: Z = 8192, latent dim d = 3
 
-다운로드한 모델은 다음 경로에 위치
+다운로드한 모델은 다음 경로에 저장
 ``models/first_stage_models/vq-f4/model.ckpt``
 
 ## RGB Conditioning Encoding
