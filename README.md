@@ -43,7 +43,7 @@ VQ 모델: https://ommer-lab.com/files/latent-diffusion/vq-f4.zip
 ``models/first_stage_models/vq-f4/model.ckpt``
 
 ## RGB Conditioning Encoding
-별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나 Pretrained FrozenCLIPEmbedder 사용
+별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나 Pretrained FrozenCLIPEmbedder 사용 가능
 
 # Run
 ```
