@@ -9,14 +9,17 @@ git push
 # pull request
 ```
 
-# DONE
-* ~~서버에 환경 설정~~
-<br>`conda activate ldm`
-
+# Environment
+```
+conda env create -f environment.yaml
+conda activate ldm
+```
 * 코드 구조
 <br>![pic1](assets/architecture.jpg)
 
-## TO DO
-* ~~서버에 환경 설정~~
-* [Latent Diffusion](latent-diffusion/) 코드 분석 (~03/20)
-* 0320
+
+# Run
+
+```
+python latent-diffusion/main.py --base configs/latent-diffusion/shanghai_amh.yaml -t --gpus 0, 
+```
