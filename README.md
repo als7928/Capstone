@@ -16,7 +16,7 @@ conda activate ldm
 ```
 * 코드 구조
 <br>![pic1](assets/architecture.jpg) 
-High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)를 베이스라인으로 사용
+[High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)를 베이스라인으로 사용
 
 
 # 데이터 구성 및 전처리
