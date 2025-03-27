@@ -27,8 +27,9 @@ Conditioning (조건 입력):
 
 데이터 경로:
 ```
-train/train_data/train_density/DENSITY_*.png   # Density map 경로
-train/train_data/train_img/IMG_*.png           # RGB 이미지 경로
+
+ShanghaiTech_val/part_A/train_data/density/DENSITY_*.png   # Density map 경로
+ShanghaiTech_val/part_A/train_data/img/IMG_*.png           # RGB 이미지 경로
 ```
 데이터 로더:
 ``latent-diffusion/ldm/data/shanghai.py``
