@@ -49,7 +49,7 @@ Pretrained VQ 모델 사용 https://ommer-lab.com/files/latent-diffusion/vq-f4.z
 ``latent-diffusion/models/first_stage_models/vq-f4/model.ckpt``
 
 ## RGB Conditioning Encoding
-별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나 Pretrained FrozenCLIPEmbedder 사용 가능
+별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나, Pretrained 모델 (FrozenCLIPEmbedder 등)이 사용 가능함
 
 # Train
 ```
