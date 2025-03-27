@@ -11,7 +11,7 @@ git push
 
 # Environment
 ```
-conda env create -f environment.yaml
+conda env create -f latent-diffusion/environment.yaml
 conda activate ldm
 ```
 * 코드 구조
