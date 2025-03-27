@@ -20,18 +20,18 @@ conda activate ldm
 
 
 # 데이터 구성 및 전처리
-density_shanghai.py 를 통해 원본 RGB 이미지에 Gaussian kernel을 적용하여 density map을 생성
+``density_shanghai.py`` 를 통해 원본 RGB 이미지에 Gaussian kernel을 적용하여 density map을 생성
 
 Conditioning (조건 입력):
 원본 RGB 이미지를 사용하며, 별도의 모델 없이 단순히 rescale 처리를 진행함
 
 데이터 경로:
 ```
-train/train_data/train_density_amh/DENSITY_*.png   # Density map 경로
-train/train_data/train_img_amh/IMG_*.png           # RGB 이미지 경로
+train/train_data/train_density/DENSITY_*.png   # Density map 경로
+train/train_data/train_img/IMG_*.png           # RGB 이미지 경로
 ```
 데이터 로더:
-``latent-diffusion/ldm/data/shanghai_amh.py``
+``latent-diffusion/ldm/data/shanghai.py``
 # Encoding
 ## Density Encoding (First Stage)
 Pretrained VQ 모델 사용 https://ommer-lab.com/files/latent-diffusion/vq-f4.zip
@@ -48,5 +48,5 @@ Pretrained VQ 모델 사용 https://ommer-lab.com/files/latent-diffusion/vq-f4.z
 
 # Train
 ```
-python latent-diffusion/main.py --base configs/latent-diffusion/shanghai_amh.yaml -t --gpus 0, 
+python latent-diffusion/main.py --base configs/latent-diffusion/config.yaml -t --gpus 0, 
 ```
