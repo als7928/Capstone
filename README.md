@@ -25,6 +25,11 @@ conda activate ldm
 Conditioning (조건 입력):
 원본 RGB 이미지를 사용하며, 별도의 모델 없이 단순히 rescale 처리를 진행함
 
+데이터셋으로는 “Shanghaitech”를 사용하였음
+“Shangaitech” 데이터셋은 1198개의 이미지로 구성이 되어있으며 인터넷에서 수집된 Part-A, 상하이 번화가 거리에서 수집된 Part-B로 나누어져 있음.
+Part-A는 300개의 train 이미지와 182개의 test 이미지로 이루어져있고 Part-B는 400개의 train 이미지와 316개의 test 이미지로 이루어져있다.
+“Shanghaitech” 데이터셋에는 330165명의 머리에 해당하는 위치데이터가 같이 포함되어 있으며 Crowd Counting에 대표적으로 사용되는 표준 벤치마크 데이터셋임
+
 데이터 경로:
 ```
 ShanghaiTech_val/part_A/train_data/density/DENSITY_*.png   # Density map 경로
