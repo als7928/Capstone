@@ -27,7 +27,6 @@ Conditioning (조건 입력):
 
 데이터 경로:
 ```
-
 ShanghaiTech_val/part_A/train_data/density/DENSITY_*.png   # Density map 경로
 ShanghaiTech_val/part_A/train_data/img/IMG_*.png           # RGB 이미지 경로
 ```
@@ -41,8 +40,8 @@ Pretrained VQ 모델 사용 https://ommer-lab.com/files/latent-diffusion/vq-f4.z
   - 4x downsample (f = 4)
   - VQ embedding space: Z = 8192, latent dim d = 3
 
-다운로드한 모델은 다음 경로에 저장
-``models/first_stage_models/vq-f4/model.ckpt``
+다운로드한 모델 체크포인트 ``model.ckpt``는 다음 경로에 저장
+``latent-diffusion/models/first_stage_models/vq-f4/model.ckpt``
 
 ## RGB Conditioning Encoding
 별도의 인코딩 모델 없이 RGB 이미지를 rescale하여 사용하거나 Pretrained FrozenCLIPEmbedder 사용 가능
